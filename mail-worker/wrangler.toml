@@ -44,4 +44,4 @@ crons = ["0 * * * *"]	#每小时执行；resetDaySendCount 仅在 UTC 0 点生�
 #jwt_secret = ""			#jwt令牌的密钥,随便填一串字符串
 
 [build]
-command = "pnpm --prefix ../mail-react install --frozen-lockfile && pnpm --prefix ../mail-react run build"
+command = "pnpm -C ../mail-react install --frozen-lockfile && pnpm -C ../mail-react run build"

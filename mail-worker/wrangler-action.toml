@@ -45,4 +45,4 @@ jwt_secret = "${JWT_SECRET}"
 project_link = "${PROJECT_LINK}"
 
 [build]
-command = "pnpm --prefix ../mail-react install --frozen-lockfile && pnpm --prefix ../mail-react run build"
+command = "pnpm -C ../mail-react install --frozen-lockfile && pnpm -C ../mail-react run build"
