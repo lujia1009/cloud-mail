@@ -1,23 +1,23 @@
 <p align="center">
     <img src="doc/demo/logo.png" width="80px" />
     <h1 align="center">Cloud Mail</h1>
-    <p align="center">基于 Cloudflare 的简约响应式邮箱服务，支持邮件发送、附件收发 🎉</p> 
+    <p align="center">基于 Cloudflare 的简约响应式邮箱服务，支持邮件发送、附件收发 🎉</p>
     <p align="center">
         简体中文 | <a href="/README-en.md" style="margin-left: 5px">English </a>
     </p>
     <p align="center">
         <a href="https://github.com/maillab/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
             <img src="https://img.shields.io/badge/license-MIT-green" />
-        </a>    
+        </a>
         <a href="https://github.com/maillab/cloud-mail/releases" target="_blank" >
             <img src="https://img.shields.io/github/v/release/maillab/cloud-mail" alt="releases" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/issues" >
             <img src="https://img.shields.io/github/issues/maillab/cloud-mail" alt="issues" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/stargazers" target="_blank">
             <img src="https://img.shields.io/github/stars/maillab/cloud-mail" alt="stargazers" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/forks" target="_blank" >
             <img src="https://img.shields.io/github/forks/maillab/cloud-mail" alt="forks" />
         </a>
@@ -60,9 +60,9 @@
 
 - **🔔 邮件推送**：接收邮件后可以转发到TG机器人或其他服务商邮箱
 
-- **📡 开放API**：支持使用API批量生成用户，多条件查询邮件 
+- **📡 开放API**：支持使用API批量生成用户，多条件查询邮件
 
-- **🔢 验证码识别**：使用Workers AI，自动识别邮件验证码 
+- **🔢 验证码识别**：使用Workers AI，自动识别邮件验证码
 
 - **📈 数据可视化**：使用ECharts对系统数据详情，用户邮件增长可视化显示
 
@@ -82,9 +82,9 @@
 
 - **ORM：**[Drizzle](https://orm.drizzle.team/)
 
-- **前端框架**：[Vue3](https://vuejs.org/) 
+- **前端框架**：[React](https://react.dev/)
 
-- **UI框架**：[Element Plus](https://element-plus.org/) 
+- **UI框架**：React + TypeScript
 
 - **邮件推送：** [Resend](https://resend.com/)
 
@@ -99,8 +99,8 @@
 ```
 cloud-mail
 ├── mail-worker				    # worker后端项目
-│   ├── src                  
-│   │   ├── api	 			    # api接口层			
+│   ├── src
+│   │   ├── api	 			    # api接口层
 │   │   ├── const  			    # 项目常量
 │   │   ├── dao                 # 数据访问层
 │   │   ├── email			    # 邮件处理接收
@@ -118,7 +118,7 @@ cloud-mail
 │   ├── pageckge.json			# 项目依赖
 │   └── wrangler.toml			# 项目配置
 │
-├── mail-vue				    # vue前端项目
+├── mail-react				    # React 前端项目
 │   ├── src
 │   │   ├── axios 			    # axios配置
 │   │   ├── components			# 自定义组件
@@ -147,12 +147,9 @@ cloud-mail
 
 ## 许可证
 
-本项目采用 [MIT](LICENSE) 许可证	
+本项目采用 [MIT](LICENSE) 许可证
 
 
 ## 交流
 
 [Telegram](https://t.me/cloud_mail_tg)
-
-
-

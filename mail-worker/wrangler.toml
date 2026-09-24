@@ -27,7 +27,7 @@ binding = "ai"
 
 [assets]
 binding = "assets"		#静态资源绑定名默认不可修改
-directory = "./dist"	#前端vue项目打包的静态资源存放位置,默认dist
+directory = "./dist"	#前端React项目打包的静态资源存放位置,默认dist
 not_found_handling = "single-page-application"
 run_worker_first = true
 
@@ -44,4 +44,4 @@ crons = ["0 * * * *"]	#每小时执行；resetDaySendCount 仅在 UTC 0 点生�
 #jwt_secret = ""			#jwt令牌的密钥,随便填一串字符串
 
 [build]
-command = "pnpm --prefix ../mail-vue install && pnpm --prefix ../mail-vue run build"
+command = "pnpm --prefix ../mail-react install --frozen-lockfile && pnpm --prefix ../mail-react run build"

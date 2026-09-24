@@ -23,6 +23,8 @@ dist
 
 mail-vue/node_modules
 mail-vue/dist
+mail-react/tinymce-source.tar
+*.tsbuildinfo
 .wrangler
 .venv
 git-tools.js
