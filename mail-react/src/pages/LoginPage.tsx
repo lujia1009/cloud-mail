@@ -179,148 +179,174 @@ export function LoginPage() {
   };
   // The Vue bootstrap waits for websiteConfig before exposing the login form.
   // Without it, the domain suffix and registration policy cannot be trusted.
-  if (config.isPending) return <div className="login-page"><Skeleton /></div>;
+  if (config.isPending)
+    return (
+      <div className="login-page">
+        <Skeleton />
+      </div>
+    );
   if (config.isError)
-    return <div className="login-page"><ErrorState error={config.error} retry={() => config.refetch()} /></div>;
+    return (
+      <div className="login-page">
+        <ErrorState error={config.error} retry={() => config.refetch()} />
+      </div>
+    );
+  const enabledProviders = (
+    [
+      { name: "google", enabled: settings.googleSwitch === 0 },
+      { name: "github", enabled: settings.githubSwitch === 0 },
+      { name: "linuxdo", enabled: settings.linuxdoSwitch === 0 },
+    ] as const
+  ).filter((provider) => provider.enabled);
   return (
     <div
-      className={`login-page${settings.background ? " has-background" : ""}`}
+      className="login-page"
       style={
         {
-          ...(settings.background
-            ? {
-                backgroundImage: `url("${r2url(settings.background, settings)}")`,
-              }
-            : {}),
           "--login-opacity": `${Math.max(0, Math.min(1, Number(settings.loginOpacity ?? 0.88))) * 100}%`,
         } as React.CSSProperties
       }
     >
-      <div className="login-intro">
-        <div className="login-mark">
-          <Mail size={32} />
+      <main className="login-content">
+        <div className="login-intro">
+          <div className="login-mark">
+            <Mail size={32} />
+          </div>
+          <h1>{settings.title ?? "Virevan Mail"}</h1>
+          <p>{t(mode === "register" ? "regTitle" : "loginTitle")}</p>
         </div>
-        <h1>{settings.title ?? "Virevan Mail"}</h1>
-        <p>{t("loginTitle")}</p>
-      </div>
-      <form className="login-form" onSubmit={submit}>
-        <h2>
-          {mode === "login"
-            ? t("loginBtn")
-            : mode === "register"
-              ? t("regBtn")
-              : t("registration")}
-        </h2>
-        <label>
-          {t("emailAccount")}
-          <span className="address-input">
-            <input
-              type="text"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="username"
-              placeholder={
-                settings.loginDomain === 1 ? "name@example.com" : "name"
-              }
-            />
-            {settings.loginDomain !== 1 && (
-              <select
-                aria-label={t("selectDomain")}
-                value={suffix || domains[0]}
-                onChange={(e) => setSuffix(e.target.value)}
-              >
-                {domains.map((domain: string) => (
-                  <option key={domain} value={domain}>
-                    {domain}
-                  </option>
-                ))}
-              </select>
-            )}
-          </span>
-        </label>
-        {mode !== "bind" && (
-          <label>
-            {t("password")}
-            <input
-              type="password"
-              required
-              minLength={mode === "register" ? 6 : 1}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={
-                mode === "login" ? "current-password" : "new-password"
-              }
-            />
-          </label>
-        )}
-        {mode === "register" && (
-          <label>
-            {t("confirmPwd")}
-            <input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </label>
-        )}
-        {mode !== "login" && settings.regKey !== 1 && (
-          <label>
-            {t("regKey")}
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required={settings.regKey === 0}
-            />
-          </label>
-        )}
-        {verifyRequired && settings.siteKey && <div id="turnstile" />}
-        <button className="primary-button" disabled={busy}>
-          {busy
-            ? t("loading")
-            : mode === "login"
+        <form className="login-form" onSubmit={submit}>
+          <h2>
+            {mode === "login"
               ? t("loginBtn")
               : mode === "register"
                 ? t("regBtn")
-                : t("save")}
-        </button>
-        {(settings.register === 0 || mode !== "login") && (
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => setMode(mode === "login" ? "register" : "login")}
-          >
-            {mode === "login" ? t("regSwitch") : t("loginSwitch")}
+                : t("registration")}
+          </h2>
+          {enabledProviders.length > 0 && (
+            <div className="login-oauth-actions">
+              {enabledProviders.map(({ name }) => (
+                <button
+                  className="oauth-button"
+                  type="button"
+                  key={name}
+                  onClick={() => oauth(name)}
+                >
+                  {name === "linuxdo"
+                    ? "LinuxDo"
+                    : name === "github"
+                      ? "GitHub"
+                      : "Google"}
+                </button>
+              ))}
+            </div>
+          )}
+          <label>
+            {t("emailAccount")}
+            <span className="address-input">
+              <input
+                type="text"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                placeholder={
+                  settings.loginDomain === 1 ? "name@example.com" : "name"
+                }
+              />
+              {settings.loginDomain !== 1 && (
+                <select
+                  aria-label={t("selectDomain")}
+                  value={suffix || domains[0]}
+                  onChange={(e) => setSuffix(e.target.value)}
+                >
+                  {domains.map((domain: string) => (
+                    <option key={domain} value={domain}>
+                      {domain}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </span>
+          </label>
+          {mode !== "bind" && (
+            <label>
+              {t("password")}
+              <input
+                type="password"
+                required
+                minLength={mode === "register" ? 6 : 1}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={
+                  mode === "login" ? "current-password" : "new-password"
+                }
+              />
+            </label>
+          )}
+          {mode === "register" && (
+            <label>
+              {t("confirmPwd")}
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </label>
+          )}
+          {mode !== "login" && settings.regKey !== 1 && (
+            <label>
+              {t("regKey")}
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required={settings.regKey === 0}
+              />
+            </label>
+          )}
+          {verifyRequired && settings.siteKey && <div id="turnstile" />}
+          <button className="primary-button" disabled={busy}>
+            {busy
+              ? t("loading")
+              : mode === "login"
+                ? t("loginBtn")
+                : mode === "register"
+                  ? t("regBtn")
+                  : t("save")}
           </button>
-        )}
-        {(["google", "github", "linuxdo"] as const)
-          .filter((p) => settings[p + "Switch"] === 0)
-          .map((p) => (
+          {(settings.register === 0 || mode !== "login") && (
             <button
-              className="oauth-button"
               type="button"
-              key={p}
-              onClick={() => oauth(p)}
+              className="text-button"
+              onClick={() => setMode(mode === "login" ? "register" : "login")}
             >
-              {p === "linuxdo"
-                ? "LinuxDo"
-                : p === "github"
-                  ? "GitHub"
-                  : "Google"}
+              {mode === "login" ? t("regSwitch") : t("loginSwitch")}
             </button>
-          ))}
-      </form>
-      {settings.projectLink && (
-        <a
-          className="project-link"
-          href="https://github.com/maillab/cloud-mail"
-          target="_blank"
-          rel="noreferrer"
-        >
-          {t("projectLink")}
-        </a>
-      )}
+          )}
+        </form>
+        {settings.projectLink && (
+          <a
+            className="project-link"
+            href="https://github.com/maillab/cloud-mail"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("projectLink")}
+          </a>
+        )}
+      </main>
+      <aside
+        className={`login-visual${settings.background ? " has-background" : ""}`}
+        style={
+          settings.background
+            ? {
+                backgroundImage: `url("${r2url(settings.background, settings)}")`,
+              }
+            : undefined
+        }
+        aria-hidden="true"
+      />
     </div>
   );
 }

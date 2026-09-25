@@ -132,7 +132,7 @@ function UsersPage() {
     );
   };
   const countSelect = (key: "receive" | "send" | "account", label: string) => (
-    <>
+    <span className="table-count-heading">
       <span>{label}</span>
       <select
         aria-label={`${label} ${t("status")}`}
@@ -143,7 +143,7 @@ function UsersPage() {
         <option value="active">{t("active")}</option>
         <option value="deleted">{t("deleted")}</option>
       </select>
-    </>
+    </span>
   );
   return (
     <div className="admin-page">
@@ -233,7 +233,17 @@ function UsersPage() {
         <Empty />
       ) : (
         <div className="data-table-wrap">
-          <table className="data-table">
+          <table className="data-table users-table">
+            <colgroup>
+              <col className="users-col-select" />
+              <col className="users-col-email" />
+              <col className="users-col-role" />
+              <col className="users-col-status" />
+              <col className="users-col-count" />
+              <col className="users-col-count" />
+              <col className="users-col-count" />
+              <col className="users-col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <th>
@@ -724,7 +734,7 @@ function RolesPage() {
       {editing && (
         <div className="modal-backdrop">
           <form
-            className="modal wide"
+            className="modal wide role-modal"
             onSubmit={async (e) => {
               e.preventDefault();
               const selectedIds = new Set<number>(
