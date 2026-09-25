@@ -164,16 +164,28 @@ const entity = readFileSync(
 const settingKeys = [
   ...entity.matchAll(/^\s*([A-Za-z]\w*): (?:integer|text)\(/gm),
 ].map((m) => m[1]);
-const adminPage = readFileSync(
-  join(root, "mail-react/src/features/admin/AdminPage.tsx"),
+const systemPage = readFileSync(
+  join(root, "mail-react/src/features/admin/SystemSettingsPage.tsx"),
   "utf8",
 );
-const settingsBlock = adminPage
-  .split("const groups:")[1]
-  .split("const secret")[0];
+const settingsBlock = systemPage
+  .split("const legacySettingGroups:")[1]
+  .split("type DialogKey")[0];
 const missingSetting = settingKeys.filter(
   (k) => k !== "background" && !new RegExp(`"${k}"`).test(settingsBlock),
 );
+const settingsBodyStart = systemPage.indexOf("type DialogKey");
+function settingUse(key) {
+  const match = new RegExp(`\\b${key}\\b`).exec(
+    systemPage.slice(settingsBodyStart),
+  );
+  const offset = match
+    ? settingsBodyStart + match.index
+    : new RegExp(`\\b${key}\\b`).exec(systemPage)?.index;
+  return offset === undefined
+    ? "—"
+    : `mail-react/src/features/admin/SystemSettingsPage.tsx:${line(systemPage, offset)}`;
+}
 const settingRows = settingKeys.map((key) => ({
   key,
   old: firstUse(
@@ -181,11 +193,7 @@ const settingRows = settingKeys.map((key) => ({
     new RegExp(`\\b${key}\\b`),
     (p) => p !== "mail-vue/src/views/sys-setting/index.vue",
   ),
-  current: firstUse(
-    newFiles,
-    new RegExp(`\\b${key}\\b`),
-    (p) => p !== "mail-react/src/features/admin/AdminPage.tsx",
-  ),
+  current: settingUse(key),
 }));
 
 const out = [
