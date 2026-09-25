@@ -14,13 +14,16 @@ export function r2url(key: string, config: SiteConfig) {
   );
 }
 export function mailHtml(content: string, config: SiteConfig) {
-  const domain = r2url("", config);
+  const raw = config.r2Domain || "";
+  const domain = raw ? (/^https?:\/\//.test(raw) ? raw : "https://" + raw) : "";
   return content.replaceAll("{{domain}}", domain.replace(/\/$/, "") + "/");
 }
 export function recipients(value: string) {
   try {
     const v = JSON.parse(value || "[]");
-    return Array.isArray(v) ? v.join(", ") : value;
+    return Array.isArray(v)
+      ? v.map((item) => typeof item === "string" ? item : item?.address || "").filter(Boolean).join(", ")
+      : value;
   } catch {
     return value || "";
   }

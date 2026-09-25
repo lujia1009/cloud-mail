@@ -649,7 +649,10 @@ function RolesPage() {
   const [form, setForm] = useState<any>(blank);
   const open = (role?: any) => {
     setEditing(role || {});
-    setForm(role ? { ...role } : blank);
+    setForm(role ? {
+      ...role,
+      availDomain: array(role.availDomain).map((domain: string) => domain.replace(/^@/, "")),
+    } : blank);
   };
   return (
     <div className="admin-page">
@@ -742,7 +745,8 @@ function RolesPage() {
               const data = {
                 ...form,
                 banEmail: array(form.banEmail),
-                availDomain: array(form.availDomain),
+                // The Worker compares these values to email.split("@")[1].
+                availDomain: array(form.availDomain).map((domain: string) => domain.replace(/^@/, "")),
                 permIds,
               };
               if (
@@ -831,8 +835,8 @@ function RolesPage() {
                   }
                 >
                   {array(config.domainList).map((domain: string) => (
-                    <option key={domain} value={domain}>
-                      {domain}
+                    <option key={domain} value={domain.replace(/^@/, "")}>
+                      {domain.replace(/^@/, "")}
                     </option>
                   ))}
                 </select>

@@ -59,6 +59,7 @@ export function MailPage({ kind }: { kind: Kind }) {
   const openCompose = useApp((s) => s.openCompose);
   const [cursorStack, setCursorStack] = useState<number[]>([0]);
   const [selected, setSelected] = useState<number[]>([]);
+  const [actionMenuId, setActionMenuId] = useState<number | null>(null);
   const [adminType, setAdminType] = useState(() => {
     try {
       return (
@@ -131,6 +132,7 @@ export function MailPage({ kind }: { kind: Kind }) {
   useEffect(() => {
     setCursorStack([0]);
     setSelected([]);
+    setActionMenuId(null);
   }, [
     kind,
     accountId,
@@ -338,6 +340,44 @@ export function MailPage({ kind }: { kind: Kind }) {
       notify(String(e));
     }
   };
+  const copyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      notify(t("copySuccessMsg"));
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const composeFromList = async (mode: "reply" | "forward", row: Mail) => {
+    try {
+      const full = fullQuery.data?.list.find((item) => item.emailId === row.emailId)
+        || (await fullQuery.refetch()).data?.list.find((item) => item.emailId === row.emailId);
+      if (!full) throw new Error("Message not found");
+      openCompose(mode, full);
+      setActionMenuId(null);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : String(error));
+    }
+  };
+  const searchFromMail = (field: string, value?: string) => {
+    if (!value) return;
+    setAdminField(field);
+    setActionMenuId(null);
+    navigate(`/all-mail?q=${encodeURIComponent(value)}`);
+  };
+  const deliveryStatus = (status: number) =>
+    t(
+      ({
+        0: "received",
+        1: "sent",
+        2: "delivered",
+        3: "bounced",
+        4: "complained",
+        5: "delayed",
+        7: "noRecipient",
+        8: "bounced",
+      } as Record<number, string>)[status] || "status",
+    );
   const next = () => {
     if (!items.length) return;
     setCursorStack((s) => [...s, items[items.length - 1].emailId]);
@@ -535,10 +575,14 @@ export function MailPage({ kind }: { kind: Kind }) {
         <div className="mail-list">
           {filtered.map((m) => (
             <div
-              className={`mail-row ${m.unread === 0 ? "unread" : "read"}`}
+              className={`mail-row ${m.unread === 0 ? "unread" : "read"} ${listKind === "all" ? "admin-mail-row" : ""} ${actionMenuId === m.emailId ? "menu-open" : ""}`}
               key={m.emailId}
               role="link"
               tabIndex={0}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setActionMenuId(m.emailId);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter")
                   navigate(`/mail/${m.emailId}`, {
@@ -598,11 +642,30 @@ export function MailPage({ kind }: { kind: Kind }) {
                 {m.name || m.sendEmail || m.toEmail}
               </span>
               <span className="row-subject">
+                {m.code && (
+                  <button
+                    className="mail-code"
+                    title={t("copyCode")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyCode(m.code!);
+                    }}
+                  >
+                    [{t("codeLabel")}{m.code}]
+                  </button>
+                )}
                 {subject(m)}
                 <span className="row-snippet">
                   {" "}
                   — {m.listText || m.text || ""}
                 </span>
+                {listKind === "all" && (
+                  <span className="admin-mail-meta">
+                    <span>{t("user")}: {m.userEmail || "—"}</span>
+                    <span>{t("emailAccount")}: {m.type === 0 ? m.toEmail : m.sendEmail}</span>
+                    <span>{deliveryStatus(m.status)}{m.isDel ? ` · ${t("selectDeleted")}` : ""}</span>
+                  </span>
+                )}
               </span>
               {m.attList?.length ? (
                 <Paperclip size={15} className="row-attachment" />
@@ -611,9 +674,34 @@ export function MailPage({ kind }: { kind: Kind }) {
               )}
               <time>{dateLabel(m.createTime, i18n.language)}</time>
               <span
-                className="row-actions"
+                className={`row-actions ${actionMenuId === m.emailId ? "menu-open" : ""}`}
                 onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
               >
+                <IconButton
+                  title={t("more")}
+                  onClick={() => setActionMenuId(actionMenuId === m.emailId ? null : m.emailId)}
+                >
+                  <MoreVertical size={17} />
+                </IconButton>
+                {actionMenuId === m.emailId && (
+                  <div className="row-action-menu" role="menu">
+                    {m.code && <button type="button" onClick={() => { void copyCode(m.code!); setActionMenuId(null); }}>{t("copyCode")}</button>}
+                    {listKind === "inbox" && <button type="button" onClick={() => { void markRead([m.emailId]); setActionMenuId(null); }}>{t("read")}</button>}
+                    {(listKind === "inbox" || listKind === "starred") && <button type="button" onClick={() => { void composeFromList("reply", m); }}>{t("reply")}</button>}
+                    {listKind !== "all" && <>
+                      <button type="button" onClick={() => { void composeFromList("forward", m); }}>{t("forward")}</button>
+                      <button type="button" onClick={() => { void changeStar(m); setActionMenuId(null); }}>{t("star")}</button>
+                    </>}
+                    {listKind === "all" && <>
+                      <button type="button" onClick={() => searchFromMail("userEmail", m.userEmail)}>{t("searchUser")}</button>
+                      <button type="button" onClick={() => searchFromMail("accountEmail", m.toEmail)}>{t("searchEmail")}</button>
+                      <button type="button" onClick={() => searchFromMail("name", m.name)}>{t("searchSender")}</button>
+                    </>}
+                    {hasPerm(user, listKind === "all" ? "all-email:delete" : "email:delete") &&
+                      <button type="button" onClick={() => { void remove([m.emailId]); setActionMenuId(null); }}>{t("delete")}</button>}
+                  </div>
+                )}
                 {hasPerm(
                   user,
                   listKind === "all" ? "all-email:delete" : "email:delete",

@@ -7,6 +7,7 @@ import { auth } from "../api/auth";
 import { ApiError } from "../api/client";
 import { useApp } from "../stores/app";
 import { r2url } from "../utils/mail";
+import { ErrorState, Skeleton } from "../components/Feedback";
 declare global {
   interface Window {
     turnstile?: {
@@ -176,6 +177,11 @@ export function LoginPage() {
       setBusy(false);
     }
   };
+  // The Vue bootstrap waits for websiteConfig before exposing the login form.
+  // Without it, the domain suffix and registration policy cannot be trusted.
+  if (config.isPending) return <div className="login-page"><Skeleton /></div>;
+  if (config.isError)
+    return <div className="login-page"><ErrorState error={config.error} retry={() => config.refetch()} /></div>;
   return (
     <div
       className={`login-page${settings.background ? " has-background" : ""}`}
@@ -218,7 +224,7 @@ export function LoginPage() {
                 settings.loginDomain === 1 ? "name@example.com" : "name"
               }
             />
-            {settings.loginDomain !== 1 && domains.length > 0 && (
+            {settings.loginDomain !== 1 && (
               <select
                 aria-label={t("selectDomain")}
                 value={suffix || domains[0]}

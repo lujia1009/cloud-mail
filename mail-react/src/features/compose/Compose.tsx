@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Maximize2, Minus, X, Paperclip, Trash2, Send } from "lucide-react";
+import { Maximize2, Minus, X, Paperclip, Trash2, Send, Eraser } from "lucide-react";
 import { useApp } from "../../stores/app";
 import { mail } from "../../api/mail";
 import { draftDb, type Draft } from "./drafts";
 import { RichEditor, type RichEditorHandle } from "./RichEditor";
 import { IconButton } from "../../components/Feedback";
-import { bytes } from "../../utils/mail";
+import { bytes, mailHtml } from "../../utils/mail";
 import type { Attachment } from "../../types";
 const readBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -24,6 +24,7 @@ const splitAddresses = (input: string) => [
       .filter(Boolean),
   ),
 ];
+const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 export function Compose() {
   const { t } = useTranslation();
   const open = useApp((s) => s.composeOpen);
@@ -31,6 +32,7 @@ export function Compose() {
   const source = useApp((s) => s.composeMail);
   const account = useApp((s) => s.account);
   const user = useApp((s) => s.user);
+  const config = useApp((s) => s.config);
   const close = useApp((s) => s.closeCompose);
   const notify = useApp((s) => s.notify);
   const qc = useQueryClient();
@@ -53,12 +55,14 @@ export function Compose() {
   const [draftId, setDraftId] = useState<number | undefined>();
   const [draftMeta, setDraftMeta] = useState<Pick<
     Draft,
-    "accountId" | "name" | "sendType" | "emailId"
+    "accountId" | "sendEmail" | "name" | "sendType" | "emailId"
   > | null>(null);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendProgress, setSendProgress] = useState(0);
+  const [confirmClose, setConfirmClose] = useState(false);
+  const initialMessage = useRef({ recipient: "", subject: "", html: "" });
   const editor = useRef<RichEditorHandle>(null);
   const pendingDraft = useRef<(Draft & { attachments?: Attachment[] }) | null>(
     null,
@@ -72,6 +76,7 @@ export function Compose() {
       setDraftId(d.draftId);
       setDraftMeta({
         accountId: d.accountId,
+        sendEmail: d.sendEmail,
         name: d.name,
         sendType: d.sendType,
         emailId: d.emailId,
@@ -83,28 +88,32 @@ export function Compose() {
       setTimeout(() => {
         if (editor.current) editor.current.innerHTML = d.content;
       }, 0);
+      initialMessage.current = { recipient: d.receiveEmail.join(", "), subject: d.subject, html: d.content };
       return;
     }
     setDraftId(undefined);
     setDraftMeta(null);
-    setRecipient(mode === "reply" && source ? source.sendEmail : "");
-    setSubject(
-      source
-        ? mode === "reply"
-          ? source.subject.startsWith("Re:")
-            ? source.subject
-            : "Re: " + source.subject
-          : source.subject
-        : "",
-    );
+    const initialRecipient = mode === "reply" && source ? source.sendEmail : "";
+    const sourceSubject = source?.subject || "";
+    const initialSubject = source
+      ? mode === "reply" && !/^(Re:|Re：|回复：|回复:)/.test(sourceSubject)
+        ? `Re: ${sourceSubject}`
+        : sourceSubject
+      : "";
+    setRecipient(initialRecipient);
+    setSubject(initialSubject);
     setAttachments([]);
+    const quoted = source?.content
+      ? mailHtml(source.content, config)
+      : `<pre style="white-space:pre-wrap">${escapeHtml(source?.text || "")}</pre>`;
     const initial =
       source && mode === "forward"
-        ? `<br><br><blockquote>${source.content || source.text || ""}</blockquote>`
+        ? `<br><br><blockquote>${quoted}</blockquote>`
         : source && mode === "reply"
-          ? `<br><br><blockquote>${source.content || source.text || ""}</blockquote>`
+          ? `<br><br><div>${escapeHtml(source.createTime)} ${escapeHtml(source.name || "")} &lt;${escapeHtml(source.sendEmail)}&gt; ${t("wrote")}:</div><blockquote>${quoted}</blockquote>`
           : "";
     setHtml(initial);
+    initialMessage.current = { recipient: initialRecipient, subject: initialSubject, html: initial };
     if (editor.current) editor.current.innerHTML = initial;
     setMinimized(false);
   }, [open, mode, source?.emailId]);
@@ -121,14 +130,20 @@ export function Compose() {
   const save = async () => {
     if (!user) return;
     const body = editor.current?.getContent() || html;
-    if (!recipient && !subject && !body.trim() && !attachments.length) {
+    if (!recipient && !subject && !body.trim()) {
+      if (draftId) {
+        const db = draftDb(user.email);
+        await db.draft.delete(draftId);
+        await db.att.delete(draftId);
+        qc.invalidateQueries({ queryKey: ["drafts", user.email] });
+      }
       close();
       return;
     }
     const db = draftDb(user.email);
     const draft: Draft = {
       createTime: new Date().toISOString().replace("T", " ").slice(0, 19),
-      sendEmail: account?.email || user.email,
+      sendEmail: draftMeta?.sendEmail || account?.email || user.email,
       accountId:
         draftMeta?.accountId || account?.accountId || user.account.accountId,
       name: draftMeta?.name || account?.name || user.name,
@@ -154,6 +169,29 @@ export function Compose() {
     }
     close();
   };
+  const clearContent = () => {
+    if (!confirm(t("clearContentConfirm"))) return;
+    setRecipient("");
+    setSubject("");
+    setHtml("");
+    setAttachments([]);
+    setDraftId(undefined);
+    setDraftMeta(null);
+    if (editor.current) editor.current.innerHTML = "";
+  };
+  const requestClose = () => {
+    if (draftId) {
+      void save();
+      return;
+    }
+    const body = editor.current?.getContent() || html;
+    if ((!recipient && !subject && !body.trim() && !attachments.length) ||
+      (mode !== "new" && !attachments.length && recipient === initialMessage.current.recipient && subject === initialMessage.current.subject && body === initialMessage.current.html)) {
+      close();
+      return;
+    }
+    setConfirmClose(true);
+  };
   const send = async () => {
     const recipients = splitAddresses(recipient);
     if (
@@ -177,7 +215,7 @@ export function Compose() {
     try {
       await mail.send(
         {
-          sendEmail: account?.email || user?.email,
+          sendEmail: draftMeta?.sendEmail || account?.email || user?.email,
           accountId:
             draftMeta?.accountId ||
             account?.accountId ||
@@ -253,7 +291,7 @@ export function Compose() {
           >
             <Maximize2 size={16} />
           </IconButton>
-          <IconButton title={t("saveDraft")} onClick={save}>
+          <IconButton title={t("close")} onClick={requestClose}>
             <X size={18} />
           </IconButton>
         </div>
@@ -264,8 +302,8 @@ export function Compose() {
             <label>
               <span>{t("from")}</span>
               <span>
-                {account?.name || user?.name} &lt;
-                {account?.email || user?.email}&gt;
+                {draftMeta?.name || account?.name || user?.name} &lt;
+                {draftMeta?.sendEmail || account?.email || user?.email}&gt;
               </span>
             </label>
             <label>
@@ -349,6 +387,9 @@ export function Compose() {
             >
               <Paperclip size={19} />
             </IconButton>
+            <IconButton title={t("clearContentConfirm")} onClick={clearContent}>
+              <Eraser size={19} />
+            </IconButton>
             <IconButton title={t("discard")} onClick={discard}>
               <Trash2 size={19} />
             </IconButton>
@@ -429,6 +470,18 @@ export function Compose() {
               <button type="button" onClick={() => setContactsOpen(false)}>
                 {t("close")}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmClose && (
+        <div className="modal-backdrop">
+          <div className="modal" role="alertdialog" aria-label={t("saveDraftConfirm")}>
+            <h2>{t("saveDraftConfirm")}</h2>
+            <div className="modal-actions">
+              <button type="button" onClick={() => setConfirmClose(false)}>{t("cancel")}</button>
+              <button type="button" onClick={() => { setConfirmClose(false); void discard(); }}>{t("discard")}</button>
+              <button type="button" className="primary-button" onClick={() => { setConfirmClose(false); void save(); }}>{t("saveDraft")}</button>
             </div>
           </div>
         </div>

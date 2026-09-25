@@ -23,6 +23,7 @@ export function SettingsPage() {
   const notify = useApp((s) => s.notify);
   const [name, setName] = useState(user?.account.name || "");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [tab, setTab] = useState("general");
   useEffect(() => {
     if (!canManageAccounts && tab === "accounts") setTab("general");
@@ -121,14 +122,25 @@ export function SettingsPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t("newPassword")}
                 />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t("confirmPassword")}
+                />
                 <button
                   disabled={password.length < 6}
-                  onClick={() =>
-                    run(async () => {
+                  onClick={() => {
+                    if (password !== confirmPassword) {
+                      notify(t("confirmPwdFailMsg"));
+                      return;
+                    }
+                    void run(async () => {
                       await auth.password(password);
                       setPassword("");
-                    })
-                  }
+                      setConfirmPassword("");
+                    });
+                  }}
                 >
                   {t("save")}
                 </button>

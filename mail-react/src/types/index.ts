@@ -43,6 +43,8 @@ export interface Mail {
   content?: string;
   attList?: Attachment[];
   accountId?: number;
+  userEmail?: string;
+  code?: string;
 }
 export interface MailPage {
   list: Mail[];
