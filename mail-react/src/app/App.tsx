@@ -42,6 +42,7 @@ function ThemeSync() {
 }
 function Protected() {
   const loc = useLocation();
+  const user = useApp((s) => s.user);
   const setUser = useApp((s) => s.setUser);
   const setConfig = useApp((s) => s.setConfig);
   const account = useApp((s) => s.account);
@@ -74,6 +75,12 @@ function Protected() {
       </div>
     );
   if (userQuery.isError) return <Navigate to="/login" replace />;
+  if (!userQuery.data || !user)
+    return (
+      <div className="boot-skeleton">
+        <Skeleton />
+      </div>
+    );
   return <AppLayout />;
 }
 function AdminGuard({

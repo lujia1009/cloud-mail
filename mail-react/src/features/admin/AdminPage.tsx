@@ -438,12 +438,13 @@ function UsersPage() {
       )}
       {edit && (
         <div className="modal-backdrop">
-          <div className="modal">
+          <div className="modal user-edit-modal">
             <h2>{edit.email}</h2>
             {edit.type !== 0 && hasPerm(user, "user:set-status") && (
               <div className="setting-row">
                 <span>{t("status")}</span>
                 <button
+                  className="user-status-button"
                   onClick={async () => {
                     await run(() =>
                       admin.userStatus({
@@ -454,7 +455,7 @@ function UsersPage() {
                     setEdit(null);
                   }}
                 >
-                  {edit.status ? t("enable") : t("disable")}
+                  {edit.status ? t("enableUser") : t("disableUser")}
                 </button>
               </div>
             )}
@@ -482,36 +483,38 @@ function UsersPage() {
                 </select>
               </div>
             )}
-            {hasPerm(user, "user:set-pwd") && (
-              <button
-                onClick={() => {
-                  const password = prompt(t("newPassword"));
-                  if (password)
-                    run(() =>
-                      admin.userPassword({ userId: edit.userId, password }),
-                    );
-                }}
-              >
-                {t("changePassword")}
-              </button>
-            )}
-            {hasPerm(user, "user:reset-send") && (
-              <button
-                onClick={() => {
-                  if (confirm(t("confirmDelete")))
-                    run(() => admin.resetSend(edit.userId));
-                }}
-              >
-                {t("resetSendCount")}
-              </button>
-            )}
-            {edit.isDel && hasPerm(user, "user:set-status") && (
-              <button
-                onClick={() => run(() => admin.restoreUser(edit.userId, 0))}
-              >
-                {t("restore")}
-              </button>
-            )}
+            <div className="user-edit-actions">
+              {hasPerm(user, "user:set-pwd") && (
+                <button
+                  onClick={() => {
+                    const password = prompt(t("newPassword"));
+                    if (password)
+                      run(() =>
+                        admin.userPassword({ userId: edit.userId, password }),
+                      );
+                  }}
+                >
+                  {t("changePassword")}
+                </button>
+              )}
+              {hasPerm(user, "user:reset-send") && (
+                <button
+                  onClick={() => {
+                    if (confirm(t("confirmDelete")))
+                      run(() => admin.resetSend(edit.userId));
+                  }}
+                >
+                  {t("resetSendCount")}
+                </button>
+              )}
+              {!!edit.isDel && hasPerm(user, "user:set-status") && (
+                <button
+                  onClick={() => run(() => admin.restoreUser(edit.userId, 0))}
+                >
+                  {t("restore")}
+                </button>
+              )}
+            </div>
             <div className="modal-actions">
               <button onClick={() => setEdit(null)}>{t("close")}</button>
             </div>
@@ -1249,6 +1252,22 @@ function SystemPage() {
   > | null>(null);
   const run = useAction("system");
   const data = query.data || {};
+  const settingSummary = (key: string) => {
+    const current = data[key];
+    if (key === "notice" && current !== undefined)
+      return Number(current) === 0 ? t("enabled") : t("disabled");
+    if (key === "noticeContent")
+      return DOMPurify.sanitize(String(current ?? ""), {
+        ALLOWED_TAGS: [],
+        ALLOWED_ATTR: [],
+      });
+    if (key === "resendTokens")
+      return Object.keys(data.resendTokens || {}).join(", ");
+    if (secret.has(key) && current) return "••••••";
+    if (Array.isArray(current)) return current.join(", ");
+    if (typeof current === "object") return JSON.stringify(current);
+    return String(current ?? "");
+  };
   useEffect(() => {
     if (!noticePreview || !Number(noticePreview.noticeDuration)) return;
     const timer = window.setTimeout(
@@ -1328,7 +1347,7 @@ function SystemPage() {
               onClick={() => setSection(g)}
               key={g}
             >
-              {g}
+              {t(g, { defaultValue: g })}
             </button>
           ))}
         </nav>
@@ -1340,7 +1359,14 @@ function SystemPage() {
       ) : (
         <div className="settings-content">
           <section>
-            <h2>{section}</h2>
+            <div className="system-section-heading">
+              <h2>{t(section, { defaultValue: section })}</h2>
+              {section === "Notice" && (
+                <button onClick={() => setNoticePreview({ ...data, notice: 0 })}>
+                  {t("preview")}
+                </button>
+              )}
+            </div>
             {section === "Delivery" && data.hasCfEmail && (
               <div className="setting-row">
                 <strong>{t("cloudflareEmailSending")}</strong>
@@ -1372,27 +1398,12 @@ function SystemPage() {
                 {t("clear")}
               </button>
             )}
-            {section === "Notice" && (
-              <button onClick={() => setNoticePreview({ ...data, notice: 0 })}>
-                {t("preview")}
-              </button>
-            )}
             {groups[section].map((key) =>
               key === "resendTokens" && data.hasCfEmail ? null : (
                 <div className="setting-row" key={key}>
                   <div>
                     <strong>{t(key, { defaultValue: key })}</strong>
-                    <small>
-                      {key === "resendTokens"
-                        ? Object.keys(data.resendTokens || {}).join(", ")
-                        : secret.has(key) && data[key]
-                          ? "••••••"
-                          : Array.isArray(data[key])
-                            ? data[key].join(", ")
-                            : typeof data[key] === "object"
-                              ? JSON.stringify(data[key])
-                              : String(data[key] ?? "")}
-                    </small>
+                    <small>{settingSummary(key)}</small>
                   </div>
                   {hasPerm(user, "setting:set") && (
                     <button

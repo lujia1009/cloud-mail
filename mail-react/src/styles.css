@@ -998,6 +998,27 @@ textarea {
   font-weight: 600;
   margin: 0 0 6px;
 }
+.system-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.system-section-heading h2 {
+  margin: 0;
+}
+.system-section-heading button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 7px 13px;
+}
+.system-section-heading button:hover {
+  background: var(--hover);
+}
 .setting-row {
   min-height: 68px;
   padding: 12px 0;
@@ -1020,6 +1041,15 @@ textarea {
   color: var(--muted);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+.admin-system .setting-row > div:first-child {
+  min-width: 0;
+}
+.admin-system .setting-row small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .setting-action,
 .theme-options {
@@ -1159,6 +1189,50 @@ textarea {
   width: min(1040px, 100%);
   max-height: 92dvh;
   padding: 28px;
+}
+.modal.user-edit-modal {
+  width: min(500px, 100%);
+}
+.user-edit-modal h2 {
+  overflow-wrap: anywhere;
+}
+.user-edit-modal .setting-row {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  min-height: 60px;
+  gap: 14px;
+}
+.user-edit-modal .setting-row > span {
+  white-space: nowrap;
+}
+.user-edit-modal .setting-row select {
+  min-width: 0;
+}
+.user-edit-modal .user-status-button {
+  justify-self: start;
+}
+.user-edit-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 9px;
+  padding: 5px 0;
+}
+.user-edit-actions button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+.user-edit-actions button:hover {
+  background: var(--hover);
+}
+.user-edit-modal .modal-actions {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 0;
 }
 .modal h2 {
   font-size: 18px;
@@ -1615,10 +1689,10 @@ body:has(.login-page) {
     top: 0;
     bottom: 0;
     left: 0;
-    width: 265px;
+    width: min(300px, calc(100vw - 48px));
     background: var(--surface);
     z-index: 90;
-    padding: 82px 14px 20px;
+    padding: 76px 14px 20px;
     transform: translateX(-100%);
     transition: transform 0.2s;
     box-shadow: var(--shadow);
@@ -1627,10 +1701,12 @@ body:has(.login-page) {
     transform: translateX(0);
   }
   .sidebar .compose-trigger {
-    min-width: 155px;
-    width: max-content;
-    height: 52px;
-    padding: 0 21px;
+    min-width: 0;
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 12px;
+    justify-content: flex-start;
   }
   .sidebar .compose-trigger span,
   .sidebar .nav-item span,
@@ -1638,18 +1714,19 @@ body:has(.login-page) {
     display: inline;
   }
   .sidebar .nav-item {
-    width: auto;
-    height: 38px;
+    width: 100%;
+    height: 40px;
     padding: 0 16px;
     justify-content: flex-start;
-    border-radius: 0 19px 19px 0;
+    border-radius: 12px;
   }
   .mobile-backdrop {
     display: block;
     position: fixed;
     inset: 0;
     border: 0;
-    background: #12203378;
+    background: #122033a6;
+    backdrop-filter: blur(3px);
     z-index: 80;
   }
   .main-area {
@@ -1665,7 +1742,7 @@ body:has(.login-page) {
   }
   .mail-row {
     height: 65px;
-    grid-template-columns: 28px 32px minmax(0, 1fr) 76px;
+    grid-template-columns: 28px 32px minmax(0, 1fr) 90px;
     grid-template-rows: 30px 28px;
     padding: 3px 11px 2px;
   }
@@ -1683,7 +1760,7 @@ body:has(.login-page) {
     font-size: 14px;
   }
   .row-subject {
-    grid-column: 3/5;
+    grid-column: 3;
     grid-row: 2;
     font-size: 13px;
   }
@@ -1693,13 +1770,27 @@ body:has(.login-page) {
   .mail-row time {
     grid-column: 4;
     grid-row: 1;
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: -0.03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .row-actions {
+    position: relative;
     display: flex;
-    top: 4px;
-    right: 6px;
+    grid-column: 4;
+    grid-row: 2;
+    top: auto;
+    right: auto;
+    justify-self: end;
     background: transparent;
+  }
+  .row-actions .icon-button {
+    width: 32px;
+    height: 32px;
+  }
+  .row-actions > .icon-button:not(:first-child) {
+    display: none;
   }
   .message {
     padding: 19px;
