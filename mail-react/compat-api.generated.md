@@ -68,7 +68,7 @@
 
 | 字段 | 旧版消费位置 | 新版消费位置 | 静态覆盖 | 差异 |
 | --- | --- | --- | --- | --- |
-| `register` | `mail-vue/src/views/login/index.vue:105` | `mail-react/src/pages/LoginPage.tsx:318` | 是 | 行为另见人工审计 |
+| `register` | `mail-vue/src/views/login/index.vue:105` | `mail-react/src/pages/LoginPage.tsx:320` | 是 | 行为另见人工审计 |
 | `title` | `mail-vue/src/init/init.js:38` | `mail-react/src/layouts/AppLayout.tsx:231` | 是 | 行为另见人工审计 |
 | `manyEmail` | `mail-vue/src/components/email-scroll/index.vue:558` | `mail-react/src/features/settings/SettingsPage.tsx:17` | 是 | 行为另见人工审计 |
 | `addEmail` | `mail-vue/src/layout/header/index.vue:55` | `mail-react/src/layouts/AppLayout.tsx:92` | 是 | 行为另见人工审计 |
@@ -78,10 +78,10 @@
 | `send` | `mail-vue/src/layout/header/index.vue:104` | `mail-react/src/layouts/AppLayout.tsx:313` | 是 | 行为另见人工审计 |
 | `r2Domain` | `mail-vue/src/layout/write/index.vue:505` | `mail-react/src/features/mail/MailPage.tsx:841` | 是 | 行为另见人工审计 |
 | `siteKey` | `mail-vue/src/layout/account/index.vue:110` | `mail-react/src/layouts/AppLayout.tsx:136` | 是 | 行为另见人工审计 |
-| `background` | `mail-vue/src/router/index.js:124` | `mail-react/src/pages/LoginPage.tsx:340` | 是 | 行为另见人工审计 |
+| `background` | `mail-vue/src/router/index.js:124` | `mail-react/src/pages/LoginPage.tsx:343` | 是 | 行为另见人工审计 |
 | `loginOpacity` | `mail-vue/src/views/login/index.vue:260` | `mail-react/src/pages/LoginPage.tsx:206` | 是 | 行为另见人工审计 |
 | `domainList` | `mail-vue/src/init/init.js:37` | `mail-react/src/layouts/AppLayout.tsx:89` | 是 | 行为另见人工审计 |
-| `regKey` | `mail-vue/src/views/login/index.vue:82` | `mail-react/src/pages/LoginPage.tsx:298` | 是 | 行为另见人工审计 |
+| `regKey` | `mail-vue/src/views/login/index.vue:82` | `mail-react/src/pages/LoginPage.tsx:300` | 是 | 行为另见人工审计 |
 | `regVerifyOpen` | `mail-vue/src/views/login/index.vue:549` | `mail-react/src/pages/LoginPage.tsx:44` | 是 | 行为另见人工审计 |
 | `addVerifyOpen` | `mail-vue/src/layout/account/index.vue:461` | `mail-react/src/layouts/AppLayout.tsx:99` | 是 | 行为另见人工审计 |
 | `noticeTitle` | `mail-vue/src/layout/main/index.vue:38` | `mail-react/src/layouts/AppLayout.tsx:554` | 是 | 行为另见人工审计 |
@@ -100,7 +100,7 @@
 | `googleClientId` | `mail-vue/src/views/login/index.vue:289` | `mail-react/src/pages/LoginPage.tsx:117` | 是 | 行为另见人工审计 |
 | `googleSwitch` | `mail-vue/src/views/login/index.vue:199` | `mail-react/src/pages/LoginPage.tsx:196` | 是 | 行为另见人工审计 |
 | `minEmailPrefix` | `mail-vue/src/layout/account/index.vue:443` | `mail-react/src/layouts/AppLayout.tsx:605` | 是 | 行为另见人工审计 |
-| `projectLink` | `mail-vue/src/views/login/index.vue:147` | `mail-react/src/pages/LoginPage.tsx:328` | 是 | 行为另见人工审计 |
+| `projectLink` | `mail-vue/src/views/login/index.vue:147` | `mail-react/src/pages/LoginPage.tsx:330` | 是 | 行为另见人工审计 |
 
 ## 后台 setting 实体：68 项
 

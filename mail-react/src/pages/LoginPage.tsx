@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Mail } from "lucide-react";
+import { ExternalLink, Mail } from "lucide-react";
 import { auth } from "../api/auth";
 import { ApiError } from "../api/client";
 import { useApp } from "../stores/app";
@@ -207,11 +207,13 @@ export function LoginPage() {
         } as React.CSSProperties
       }
     >
+      <div className="login-brand" aria-hidden="true">
+        <div className="login-mark">
+          <Mail size={27} />
+        </div>
+      </div>
       <main className="login-content">
         <div className="login-intro">
-          <div className="login-mark">
-            <Mail size={32} />
-          </div>
           <h1>{settings.title ?? "Virevan Mail"}</h1>
           <p>{t(mode === "register" ? "regTitle" : "loginTitle")}</p>
         </div>
@@ -331,8 +333,9 @@ export function LoginPage() {
             href="https://github.com/maillab/cloud-mail"
             target="_blank"
             rel="noreferrer"
+            aria-label={t("projectLink")}
           >
-            {t("projectLink")}
+            <ExternalLink size={17} aria-hidden="true" />
           </a>
         )}
       </main>
