@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useApp } from "../stores/app";
+import { Button } from "./Controls";
 export function IconButton({
   title,
   onClick,
@@ -60,7 +61,7 @@ export function ErrorState({
     <div className="empty-state">
       <h3>{t("error")}</h3>
       <p>{error instanceof Error ? error.message : String(error)}</p>
-      <button onClick={retry}>{t("retry")}</button>
+      <Button onClick={retry}>{t("retry")}</Button>
     </div>
   );
 }

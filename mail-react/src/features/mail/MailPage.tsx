@@ -33,6 +33,7 @@ import {
   ErrorState,
   IconButton,
 } from "../../components/Feedback";
+import { Button } from "../../components/Controls";
 import { dateLabel, recipients, subject, r2url, bytes } from "../../utils/mail";
 import type { Mail } from "../../types";
 type Kind = "inbox" | "sent" | "starred" | "all" | "detail";
@@ -449,12 +450,12 @@ export function MailPage({ kind }: { kind: Kind }) {
               <option value="accountEmail">{t("emailAccount")}</option>
             </select>
             {hasPerm(user, "all-email:delete") && (
-              <button
+              <Button
                 className="toolbar-batch"
                 onClick={() => setBatchOpen(true)}
               >
                 {t("clearEmail")}
-              </button>
+              </Button>
             )}
           </>
         )}
@@ -869,13 +870,9 @@ function Detail({
           </>
         )}
       </div>
-      {query.isLoading ? (
-        <Skeleton rows={5} />
-      ) : query.isError ? (
-        <ErrorState error={query.error} retry={() => query.refetch()} />
-      ) : (
-        m && (
-          <article className="message">
+      {m && !query.isLoading && !query.isError && (
+        <div className="detail-message-header">
+          <div className="message">
             <h1>{subject(m)}</h1>
             <div className="message-meta">
               <div className="sender-avatar">
@@ -924,73 +921,91 @@ function Detail({
                       })()}
               </div>
             )}
-            <div className="message-body">
-              {html ? (
-                <iframe
-                  title={t("mailDetail")}
-                  sandbox="allow-popups allow-popups-to-escape-sandbox"
-                  srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{font-family:Arial,sans-serif;margin:16px;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
-                />
-              ) : (
-                <pre>{m.text}</pre>
-              )}
-            </div>
-            {!!m.attList?.length && (
-              <section className="attachments">
-                <h3>
-                  {t("attachments")} ({m.attList.length})
-                </h3>
-                <div className="attachment-list">
-                  {m.attList.map((a) => (
-                    <div className="attachment" key={a.attId || a.key}>
-                      <span>
-                        <Paperclip size={18} />
-                        {a.filename}
-                        <small>{bytes(a.size)}</small>
-                      </span>
-                      <div>
-                        {a.filename.match(
-                          /\.(png|jpg|jpeg|bmp|gif|jfif|webp)$/i,
-                        ) && (
-                          <IconButton
-                            title={t("preview")}
-                            onClick={() =>
-                              setPreview(r2url(a.key || "", config))
-                            }
-                          >
-                            <Search size={17} />
-                          </IconButton>
-                        )}
-                        <a
-                          href={r2url(a.key || "", config)}
-                          download={a.filename}
-                          target="_blank"
-                          rel="noreferrer"
-                          title={t("download")}
-                        >
-                          <Download size={17} />
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-            {kind !== "all" && hasPerm(user, "email:send") && (
-              <div className="detail-reply">
-                <button onClick={() => compose("reply", m)}>
-                  <Reply size={17} />
-                  {t("reply")}
-                </button>
-                <button onClick={() => compose("forward", m)}>
-                  <Forward size={17} />
-                  {t("forward")}
-                </button>
-              </div>
-            )}
-          </article>
-        )
+          </div>
+        </div>
       )}
+      <div className="detail-scroll">
+        {query.isLoading ? (
+          <Skeleton rows={5} />
+        ) : query.isError ? (
+          <ErrorState error={query.error} retry={() => query.refetch()} />
+        ) : (
+          m && (
+            <article className="message message-content">
+              <div className="message-body">
+                {html ? (
+                  <iframe
+                    title={t("mailDetail")}
+                    sandbox="allow-popups allow-popups-to-escape-sandbox"
+                    srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{font-family:Arial,sans-serif;margin:16px;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
+                  />
+                ) : (
+                  <pre>{m.text}</pre>
+                )}
+              </div>
+              {!!m.attList?.length && (
+                <section className="attachments">
+                  <h3>
+                    {t("attachments")} ({m.attList.length})
+                  </h3>
+                  <div className="attachment-list">
+                    {m.attList.map((a) => (
+                      <div className="attachment" key={a.attId || a.key}>
+                        <span>
+                          <Paperclip size={18} />
+                          {a.filename}
+                          <small>{bytes(a.size)}</small>
+                        </span>
+                        <div>
+                          {a.filename.match(
+                            /\.(png|jpg|jpeg|bmp|gif|jfif|webp)$/i,
+                          ) && (
+                            <IconButton
+                              title={t("preview")}
+                              onClick={() =>
+                                setPreview(r2url(a.key || "", config))
+                              }
+                            >
+                              <Search size={17} />
+                            </IconButton>
+                          )}
+                          <a
+                            href={r2url(a.key || "", config)}
+                            download={a.filename}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={t("download")}
+                          >
+                            <Download size={17} />
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </article>
+          )
+        )}
+      </div>
+      {m &&
+        !query.isLoading &&
+        !query.isError &&
+        kind !== "all" &&
+        hasPerm(user, "email:send") && (
+          <div className="detail-reply">
+            <div className="detail-reply-inner">
+              <Button onClick={() => compose("reply", m)}>
+                <Reply size={17} />
+                {t("reply")}
+              </Button>
+              <Button onClick={() => compose("forward", m)}>
+                <Forward size={17} />
+                {t("forward")}
+              </Button>
+            </div>
+          </div>
+        )}
       {preview && (
         <div className="modal-backdrop" onClick={() => setPreview("")}>
           <img

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Button } from "../../components/Controls";
 import { auth } from "../../api/auth";
 import { accounts } from "../../api/mail";
 import { useApp, hasPerm } from "../../stores/app";
@@ -88,7 +89,7 @@ export function SettingsPage() {
               </div>
               <div className="setting-action">
                 <input value={name} onChange={(e) => setName(e.target.value)} />
-                <button
+                <Button
                   disabled={!name.trim()}
                   onClick={async () => {
                     if (!user) return;
@@ -107,7 +108,7 @@ export function SettingsPage() {
                   }}
                 >
                   {t("save")}
-                </button>
+                </Button>
               </div>
             </div>
             <div className="setting-row">
@@ -128,7 +129,7 @@ export function SettingsPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder={t("confirmPassword")}
                 />
-                <button
+                <Button
                   disabled={password.length < 6}
                   onClick={() => {
                     if (password !== confirmPassword) {
@@ -143,7 +144,7 @@ export function SettingsPage() {
                   }}
                 >
                   {t("save")}
-                </button>
+                </Button>
               </div>
             </div>
           </section>

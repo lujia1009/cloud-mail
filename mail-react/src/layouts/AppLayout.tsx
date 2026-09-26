@@ -42,6 +42,7 @@ import { ApiError } from "../api/client";
 import { accounts } from "../api/mail";
 import { useApp, hasPerm } from "../stores/app";
 import { IconButton } from "../components/Feedback";
+import { Button } from "../components/Controls";
 import { Compose } from "../features/compose/Compose";
 const links = [
   ["/inbox", "inbox", Inbox],
@@ -259,7 +260,7 @@ export function AppLayout() {
           {filters && (
             <div className="search-popover">
               <p>{t("searchPersonalHint")}</p>
-              <button type="submit">{t("searchMail")}</button>
+              <Button type="submit">{t("searchMail")}</Button>
             </div>
           )}
         </form>

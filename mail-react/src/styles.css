@@ -261,9 +261,11 @@ textarea {
   border: 0;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 15px;
   padding: 0 21px;
   height: 52px;
+  min-height: 52px;
   width: max-content;
   min-width: 155px;
   border-radius: 16px;
@@ -486,6 +488,11 @@ textarea {
   background: var(--subtle);
   padding: 6px;
 }
+.list-toolbar .toolbar-batch {
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
 .mail-list {
   width: 100%;
 }
@@ -519,7 +526,9 @@ textarea {
   z-index: 1;
   background: var(--hover);
 }
-.mail-row.menu-open { z-index: 8; }
+.mail-row.menu-open {
+  z-index: 8;
+}
 .mail-row:hover .row-actions {
   display: flex;
 }
@@ -552,10 +561,32 @@ textarea {
   text-align: right;
   white-space: nowrap;
 }
-.admin-mail-row { height: 64px; }
-.admin-mail-meta { display: flex; gap: 12px; overflow: hidden; color: var(--muted); font-size: 11px; font-weight: 400; white-space: nowrap; }
-.admin-mail-meta > span { overflow: hidden; text-overflow: ellipsis; }
-.mail-code { margin-right: 6px; padding: 1px 4px; border: 0; border-radius: 4px; color: var(--accent); background: var(--hover); cursor: pointer; font: inherit; }
+.admin-mail-row {
+  height: 64px;
+}
+.admin-mail-meta {
+  display: flex;
+  gap: 12px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.admin-mail-meta > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mail-code {
+  margin-right: 6px;
+  padding: 1px 4px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--accent);
+  background: var(--hover);
+  cursor: pointer;
+  font: inherit;
+}
 .row-attachment {
   color: var(--muted);
 }
@@ -567,7 +598,9 @@ textarea {
   background: var(--hover);
   gap: 0;
 }
-.row-actions.menu-open { display: flex; }
+.row-actions.menu-open {
+  display: flex;
+}
 .row-action-menu {
   position: absolute;
   top: 31px;
@@ -591,7 +624,9 @@ textarea {
   white-space: nowrap;
   cursor: pointer;
 }
-.row-action-menu button:hover { background: var(--hover); }
+.row-action-menu button:hover {
+  background: var(--hover);
+}
 .draft-row {
   grid-template-columns: 30px minmax(120px, 250px) 1fr 95px 40px;
 }
@@ -641,12 +676,11 @@ textarea {
   font-size: 56px;
   color: var(--line);
 }
-.empty-state button,
+.ui-button,
 .setting-row button,
 .table-actions button,
 .admin-filters button,
-.modal-actions button,
-.detail-reply button {
+.modal-actions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -657,16 +691,45 @@ textarea {
   border-radius: 7px;
   padding: 8px 13px;
 }
-.empty-state button:hover,
+.ui-button:hover,
 .setting-row button:hover,
 .table-actions button:hover,
 .admin-filters button:hover,
-.modal-actions button:hover,
-.detail-reply button:hover {
+.modal-actions button:hover {
   background: var(--hover);
 }
 .detail-view {
   background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.detail-view .detail-toolbar {
+  position: relative;
+  flex: 0 0 50px;
+}
+.detail-message-header {
+  flex: 0 1 auto;
+  max-height: 42%;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--line);
+}
+.detail-message-header .message {
+  padding-bottom: 22px;
+}
+.detail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.message-content {
+  padding-top: 0;
+  padding-bottom: 28px;
+}
+.message-content .message-body {
+  padding-top: 18px;
+  min-height: 0;
 }
 .message {
   max-width: 1020px;
@@ -796,9 +859,16 @@ textarea {
   padding: 8px;
 }
 .detail-reply {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  padding: 12px 36px;
+}
+.detail-reply-inner {
+  width: min(948px, 100%);
+  margin: 0 auto;
   display: flex;
   gap: 12px;
-  margin-top: 25px;
 }
 .compose-window {
   position: fixed;
@@ -1311,14 +1381,35 @@ textarea {
   border-radius: 8px;
 }
 @media (max-width: 600px) {
-  .system-tabs h1 { padding: 18px 0 9px; }
-  .system-tabs nav { gap: 18px; }
-  .system-tabs nav button { min-height: 46px; padding: 9px 1px 11px; }
-  .system-card h2 { padding: 18px 0 10px; }
-  .system-item { min-height: 56px; flex-wrap: wrap; gap: 10px; }
-  .system-item-action { margin-left: auto; }
-  .system-item select, .system-number { max-width: min(180px, 55vw); }
-  .system-background-row img { width: 125px; height: 80px; }
+  .system-tabs h1 {
+    padding: 18px 0 9px;
+  }
+  .system-tabs nav {
+    gap: 18px;
+  }
+  .system-tabs nav button {
+    min-height: 46px;
+    padding: 9px 1px 11px;
+  }
+  .system-card h2 {
+    padding: 18px 0 10px;
+  }
+  .system-item {
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .system-item-action {
+    margin-left: auto;
+  }
+  .system-item select,
+  .system-number {
+    max-width: min(180px, 55vw);
+  }
+  .system-background-row img {
+    width: 125px;
+    height: 80px;
+  }
 }
 .system-section-heading {
   display: flex;
@@ -1542,14 +1633,7 @@ textarea {
 }
 .user-edit-actions button {
   min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-}
-.user-edit-actions button:hover {
-  background: var(--hover);
 }
 .user-edit-modal .modal-actions {
   border-top: 1px solid var(--line);
@@ -2082,8 +2166,16 @@ body:has(.login-page) {
     grid-template-rows: 30px 28px;
     padding: 3px 11px 2px;
   }
-  .admin-mail-row { height: 100px; grid-template-rows: 30px 64px; }
-  .admin-mail-meta { flex-direction: column; gap: 0; font-size: 10px; line-height: 1.3; }
+  .admin-mail-row {
+    height: 100px;
+    grid-template-rows: 30px 64px;
+  }
+  .admin-mail-meta {
+    flex-direction: column;
+    gap: 0;
+    font-size: 10px;
+    line-height: 1.3;
+  }
   .mail-row > input {
     grid-row: 1/3;
   }
@@ -2190,7 +2282,7 @@ body:has(.login-page) {
     height: 48px;
   }
   .detail-reply {
-    padding-bottom: 25px;
+    padding: 10px 19px max(10px, env(safe-area-inset-bottom));
   }
 }
 @media (max-width: 500px) {

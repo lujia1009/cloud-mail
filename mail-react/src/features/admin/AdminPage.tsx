@@ -19,6 +19,7 @@ import {
   ErrorState,
   IconButton,
 } from "../../components/Feedback";
+import { Button } from "../../components/Controls";
 type Kind = "users" | "roles" | "keys" | "system";
 const array = (v: any): any[] => (Array.isArray(v) ? v : []);
 export function AdminPage({ kind }: { kind: Kind }) {
@@ -180,14 +181,14 @@ function UsersPage() {
           <option value={1}>{t("disabled")}</option>
           <option value={-2}>{t("deleted")}</option>
         </select>
-        <button
+        <Button
           onClick={() => {
             setTimeSort((v) => (v ? 0 : 1));
             setPage(1);
           }}
         >
           {t("sort")}: {timeSort ? "↑" : "↓"}
-        </button>
+        </Button>
         <select
           value={size}
           aria-label={t("count")}
@@ -482,7 +483,7 @@ function UsersPage() {
             )}
             <div className="user-edit-actions">
               {hasPerm(user, "user:set-pwd") && (
-                <button
+                <Button
                   onClick={() => {
                     const password = prompt(t("newPassword"));
                     if (password)
@@ -492,24 +493,24 @@ function UsersPage() {
                   }}
                 >
                   {t("changePassword")}
-                </button>
+                </Button>
               )}
               {hasPerm(user, "user:reset-send") && (
-                <button
+                <Button
                   onClick={() => {
                     if (confirm(t("confirmDelete")))
                       run(() => admin.resetSend(edit.userId));
                   }}
                 >
                   {t("resetSendCount")}
-                </button>
+                </Button>
               )}
               {!!edit.isDel && hasPerm(user, "user:set-status") && (
-                <button
+                <Button
                   onClick={() => run(() => admin.restoreUser(edit.userId, 0))}
                 >
                   {t("restore")}
-                </button>
+                </Button>
               )}
             </div>
             <div className="modal-actions">
@@ -554,21 +555,21 @@ function UsersPage() {
             )}
             <div className="table-pagination">
               <span>{accountQuery.data?.total || 0}</span>
-              <button
+              <Button
                 disabled={accountPage <= 1}
                 onClick={() => setAccountPage(accountPage - 1)}
               >
                 {t("previous")}
-              </button>
+              </Button>
               <span>{accountPage}</span>
-              <button
+              <Button
                 disabled={
                   accountPage * 10 >= Number(accountQuery.data?.total || 0)
                 }
                 onClick={() => setAccountPage(accountPage + 1)}
               >
                 {t("next")}
-              </button>
+              </Button>
             </div>
             <div className="modal-actions">
               <button onClick={() => setAccountsFor(null)}>{t("close")}</button>
@@ -619,14 +620,14 @@ function UsersPage() {
             {details.sendAction?.hasPerm &&
               details.sendAction?.sendCount > 0 &&
               hasPerm(user, "user:reset-send") && (
-                <button
+                <Button
                   onClick={() => {
                     if (confirm(t("confirmDelete")))
                       run(() => admin.resetSend(details.userId));
                   }}
                 >
                   {t("resetSendCount")}
-                </button>
+                </Button>
               )}
             <div className="modal-actions">
               <button onClick={() => setDetails(null)}>{t("close")}</button>
@@ -1067,14 +1068,14 @@ function KeysPage() {
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
               />
             </label>
-            <button
+            <Button
               type="button"
               onClick={() =>
                 setForm({ ...form, code: crypto.randomUUID().slice(0, 8) })
               }
             >
               {t("generate")}
-            </button>
+            </Button>
             <label>
               {t("count")}
               <input

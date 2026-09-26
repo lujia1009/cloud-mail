@@ -7,6 +7,7 @@ import { mail } from "../../api/mail";
 import { draftDb, type Draft } from "./drafts";
 import { RichEditor, type RichEditorHandle } from "./RichEditor";
 import { IconButton } from "../../components/Feedback";
+import { Button } from "../../components/Controls";
 import { bytes, mailHtml } from "../../utils/mail";
 import type { Attachment } from "../../types";
 const readBase64 = (file: File) =>
@@ -320,7 +321,7 @@ export function Compose() {
                   <option key={v} value={v} />
                 ))}
               </datalist>
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   setSelectedContacts(
@@ -330,7 +331,7 @@ export function Compose() {
                 }}
               >
                 {t("recentContacts")}
-              </button>
+              </Button>
             </label>
             <input
               type="text"
