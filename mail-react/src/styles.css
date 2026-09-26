@@ -1761,15 +1761,19 @@ body:has(.login-page) {
   background: var(--bg);
 }
 .login-page {
+  --login-layout-width: min(100vw, 1680px);
+  --login-control-height: clamp(40px, 3.125vw, 48px);
   position: relative;
   min-height: 100dvh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(40px, 4.3vw, 68px);
-  max-width: 1450px;
+  grid-template-columns: minmax(0, 44fr) minmax(0, 33.5fr);
+  align-items: start;
+  gap: calc(var(--login-layout-width) * 0.07);
+  max-width: 1680px;
   margin: auto;
-  padding: clamp(30px, 7dvh, 80px) clamp(28px, 4vw, 60px);
+  padding: clamp(100px, 19.8dvh, 180px)
+    calc(var(--login-layout-width) * 0.107) 8px
+    calc(var(--login-layout-width) * 0.048);
 }
 .login-brand {
   position: absolute;
@@ -1777,14 +1781,14 @@ body:has(.login-page) {
   left: clamp(28px, 4vw, 60px);
 }
 .login-content {
-  width: min(100%, 590px);
-  margin: auto;
+  width: 100%;
+  margin: 0;
+  padding-top: clamp(20px, 3dvh, 32px);
   text-align: center;
-  transform: translateY(13px);
 }
 .login-visual {
-  width: calc(100% - clamp(16px, 2.5vw, 36px));
-  height: min(85dvh, 920px);
+  width: min(100%, calc((100dvh - clamp(100px, 19.8dvh, 180px) - 8px) * 0.8));
+  aspect-ratio: 4 / 5;
   min-height: 0;
   border-radius: 22px;
   background-color: #f5f3ef;
@@ -1793,27 +1797,26 @@ body:has(.login-page) {
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: 0 8px 26px #3028200a;
-  transform: translateY(4dvh);
 }
 :root[data-theme="dark"] .login-visual:not(.has-background) {
   background-image: linear-gradient(145deg, var(--subtle), var(--surface));
 }
 .login-intro {
-  margin-bottom: 45px;
+  margin-bottom: clamp(28px, 2.4vw, 38px);
 }
 .login-intro h1 {
   font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
-  font-size: clamp(58px, 5vw, 72px);
+  font-size: clamp(48px, 4.4vw, 68px);
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.08;
   overflow-wrap: anywhere;
   text-wrap: balance;
-  margin: 0 0 20px;
+  margin: 0 0 clamp(16px, 1.6vw, 24px);
 }
 .login-intro p {
   color: var(--muted);
-  font-size: 19px;
+  font-size: clamp(16px, 1.5vw, 20px);
   line-height: 1.4;
   margin: 0;
 }
@@ -1827,8 +1830,8 @@ body:has(.login-page) {
   place-items: center;
 }
 .login-form {
-  width: min(100%, 535px);
-  min-height: 374px;
+  width: min(100%, clamp(420px, 35vw, 560px));
+  min-height: clamp(314px, 24.5vw, 380px);
   margin: auto;
   background: color-mix(
     in srgb,
@@ -1836,8 +1839,8 @@ body:has(.login-page) {
     transparent
   );
   border: 1px solid #e8e8e8;
-  padding: 34px;
-  border-radius: 34px;
+  padding: clamp(28px, 2.2vw, 35px);
+  border-radius: clamp(28px, 2.5vw, 36px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1871,9 +1874,7 @@ body:has(.login-page) {
   border-radius: 0 10px 10px 0;
 }
 .project-link {
-  position: absolute;
-  bottom: 22px;
-  left: clamp(28px, 4vw, 60px);
+  margin: clamp(16px, 1.9vw, 28px) auto 0;
   width: 34px;
   height: 34px;
   display: grid;
@@ -1954,7 +1955,7 @@ body:has(.login-page) {
 }
 .login-form input,
 .login-form select {
-  min-height: 48px;
+  min-height: var(--login-control-height);
   border-radius: 10px;
   border-color: #e2e2e2;
 }
@@ -1972,7 +1973,7 @@ body:has(.login-page) {
   width: 100%;
 }
 .login-form .primary-button {
-  min-height: 48px;
+  min-height: var(--login-control-height);
   border-radius: 10px;
   margin-top: 0;
   background: #0b0b0b;
@@ -2000,10 +2001,10 @@ body:has(.login-page) {
   border: 1px solid #e2e2e2;
   background: var(--surface);
   color: var(--text);
-  min-height: 48px;
+  min-height: var(--login-control-height, 48px);
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 17px;
+  font-size: clamp(15px, 1.25vw, 17px);
   box-shadow: 0 1px 2px #0000000d;
 }
 .oauth-mark {
@@ -2102,12 +2103,16 @@ body:has(.login-page) {
     padding-top: 92px;
     padding-bottom: 30px;
   }
+  .login-content {
+    padding-top: 0;
+  }
   .login-visual {
     width: min(100%, 535px);
     height: 220px;
+    max-height: none;
+    aspect-ratio: auto;
     min-height: 0;
     justify-self: center;
-    transform: none;
   }
   .project-link {
     position: static;
@@ -2303,7 +2308,6 @@ body:has(.login-page) {
   }
   .login-content {
     padding: 0;
-    transform: none;
   }
   .login-intro {
     margin-bottom: 22px;
