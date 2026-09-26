@@ -868,7 +868,7 @@ function Detail({
           /\/$/,
           "",
         ) + "/"
-      : "",
+      : "/",
   );
   return (
     <div className="detail-view">

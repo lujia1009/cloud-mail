@@ -17,8 +17,9 @@ export default {
 			return app.fetch(req, env, ctx);
 		}
 
-		 if (['/static/','/attachments/'].some(p => url.pathname.startsWith(p))) {
-			 return await kvObjService.toObjResp( { env }, url.pathname.substring(1));
+		 if (['/static/','/attachments/','/mail/attachments/'].some(p => url.pathname.startsWith(p))) {
+			 const key = url.pathname.replace(/^\/mail\/attachments\//, '/attachments/').substring(1);
+			 return await kvObjService.toObjResp({ env }, key, req);
 		 }
 
 		return env.assets.fetch(req);

@@ -3,7 +3,7 @@ export function r2url(key: string, config: SiteConfig) {
   if (!key) return "";
   if (/^https?:\/\//.test(key)) return key;
   const domain = config.r2Domain;
-  if (!domain) return key;
+  if (!domain) return "/" + key.replace(/^\/+/, "");
   return (
     `${/^https?:\/\//.test(domain) ? domain : "https://" + domain}`.replace(
       /\/$/,

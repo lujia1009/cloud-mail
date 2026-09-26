@@ -23,6 +23,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//, /^\/static\//, /^\/(?:mail\/)?attachments\//],
         globPatterns: ["**/*.{js,css,html,svg}"],
         runtimeCaching: [],
       },
@@ -30,5 +31,10 @@ export default defineConfig({
   ],
   base: "/",
   build: { outDir: "../mail-worker/dist", emptyOutDir: true },
-  server: { proxy: { "/api": "http://localhost:8787" } },
+  server: { proxy: {
+    "/api": "http://localhost:8787",
+    "/static/": "http://localhost:8787",
+    "/attachments/": "http://localhost:8787",
+    "/mail/attachments/": "http://localhost:8787",
+  } },
 });

@@ -23,18 +23,22 @@ const kvObjService = {
 			return null;
 		}
 
-		return new Response(obj.value, {
-			headers: {
-				'Content-Type': obj.metadata?.contentType || 'application/octet-stream',
-				'Content-Disposition': obj.metadata?.contentDisposition || null,
-				'Cache-Control': obj.metadata?.cacheControl || null
-			}
+		const headers = new Headers({
+			'Content-Type': obj.metadata?.contentType || 'application/octet-stream',
+			'Content-Length': String(obj.value.byteLength),
 		});
+		if (obj.metadata?.contentDisposition) headers.set('Content-Disposition', obj.metadata.contentDisposition);
+		if (obj.metadata?.cacheControl) headers.set('Cache-Control', obj.metadata.cacheControl);
+		return new Response(obj.value, { headers });
 	},
 
-	async toObjResp(c, key) {
-
-		return await this.getObj(c, key);
+	async toObjResp(c, key, request) {
+		if (request && !['GET', 'HEAD'].includes(request.method)) {
+			return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+		}
+		const response = await this.getObj(c, key);
+		if (!response) return new Response('Not Found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+		return request?.method === 'HEAD' ? new Response(null, { headers: response.headers }) : response;
 
 	}
 
