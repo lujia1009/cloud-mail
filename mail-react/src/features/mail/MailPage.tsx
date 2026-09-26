@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useNavigate,
   useLocation,
@@ -748,6 +748,30 @@ function Detail({
   const qc = useQueryClient();
   const [expand, setExpand] = useState(false);
   const [preview, setPreview] = useState("");
+  const frameObserver = useRef<ResizeObserver | null>(null);
+  useEffect(() => () => frameObserver.current?.disconnect(), []);
+  const fitMessageFrame = (frame: HTMLIFrameElement) => {
+    frameObserver.current?.disconnect();
+    const document = frame.contentDocument;
+    if (!document?.body) return;
+    frame.style.height = "120px";
+    const resize = () => {
+      const style = document.defaultView?.getComputedStyle(document.body);
+      const margins =
+        (Number.parseFloat(style?.marginTop || "0") || 0) +
+        (Number.parseFloat(style?.marginBottom || "0") || 0);
+      const height = Math.max(120, Math.ceil(document.body.scrollHeight + margins));
+      if (frame.style.height !== `${height}px`) {
+        frame.style.height = `${height}px`;
+      }
+    };
+    resize();
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(resize);
+      observer.observe(document.body);
+      frameObserver.current = observer;
+    }
+  };
   const kind = ctx.kind || "inbox";
   const accountId = account?.accountId || user?.account.accountId || 0;
   const detailKey = [
@@ -870,60 +894,6 @@ function Detail({
           </>
         )}
       </div>
-      {m && !query.isLoading && !query.isError && (
-        <div className="detail-message-header">
-          <div className="message">
-            <h1>{subject(m)}</h1>
-            <div className="message-meta">
-              <div className="sender-avatar">
-                {(m.name || m.sendEmail || "?").slice(0, 1).toUpperCase()}
-              </div>
-              <div className="message-address">
-                <strong>{m.name || m.sendEmail}</strong>
-                <span>{m.sendEmail}</span>
-                <button
-                  className="details-toggle"
-                  onClick={() => setExpand(!expand)}
-                >
-                  {t("to")}: {recipients(m.recipient) || m.toEmail}{" "}
-                  <MoreVertical size={13} />
-                </button>
-                {expand && (
-                  <div className="message-details">
-                    <div>
-                      {t("from")}: {m.sendEmail}
-                    </div>
-                    <div>
-                      {t("to")}: {recipients(m.recipient) || m.toEmail}
-                    </div>
-                    <div>
-                      {t("date")}: {m.createTime}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <time>{dateLabel(m.createTime, i18n.language)}</time>
-            </div>
-            {m.status >= 3 && (
-              <div className="status-banner">
-                {m.status === 4
-                  ? t("complained")
-                  : m.status === 5
-                    ? t("delayed")
-                    : (() => {
-                        try {
-                          return (
-                            JSON.parse(m.message || "{}").message || m.message
-                          );
-                        } catch {
-                          return m.message;
-                        }
-                      })()}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
       <div className="detail-scroll">
         {query.isLoading ? (
           <Skeleton rows={5} />
@@ -931,12 +901,61 @@ function Detail({
           <ErrorState error={query.error} retry={() => query.refetch()} />
         ) : (
           m && (
-            <article className="message message-content">
+            <article className="message">
+              <h1>{subject(m)}</h1>
+              <div className="message-meta">
+                <div className="sender-avatar">
+                  {(m.name || m.sendEmail || "?").slice(0, 1).toUpperCase()}
+                </div>
+                <div className="message-address">
+                  <strong>{m.name || m.sendEmail}</strong>
+                  <span>{m.sendEmail}</span>
+                  <button
+                    className="details-toggle"
+                    onClick={() => setExpand(!expand)}
+                  >
+                    {t("to")}: {recipients(m.recipient) || m.toEmail}{" "}
+                    <MoreVertical size={13} />
+                  </button>
+                  {expand && (
+                    <div className="message-details">
+                      <div>
+                        {t("from")}: {m.sendEmail}
+                      </div>
+                      <div>
+                        {t("to")}: {recipients(m.recipient) || m.toEmail}
+                      </div>
+                      <div>
+                        {t("date")}: {m.createTime}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <time>{dateLabel(m.createTime, i18n.language)}</time>
+              </div>
+              {m.status >= 3 && (
+                <div className="status-banner">
+                  {m.status === 4
+                    ? t("complained")
+                    : m.status === 5
+                      ? t("delayed")
+                      : (() => {
+                          try {
+                            return (
+                              JSON.parse(m.message || "{}").message || m.message
+                            );
+                          } catch {
+                            return m.message;
+                          }
+                        })()}
+                </div>
+              )}
               <div className="message-body">
                 {html ? (
                   <iframe
                     title={t("mailDetail")}
-                    sandbox="allow-popups allow-popups-to-escape-sandbox"
+                    sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                    onLoad={(event) => fitMessageFrame(event.currentTarget)}
                     srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{font-family:Arial,sans-serif;margin:16px;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
                   />
                 ) : (
