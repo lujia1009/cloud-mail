@@ -956,7 +956,7 @@ function Detail({
                     title={t("mailDetail")}
                     sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                     onLoad={(event) => fitMessageFrame(event.currentTarget)}
-                    srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{font-family:Arial,sans-serif;margin:16px;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
+                    srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{display:flow-root;font-family:Arial,sans-serif;margin:0;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
                   />
                 ) : (
                   <pre>{m.text}</pre>
