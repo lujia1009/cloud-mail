@@ -754,13 +754,13 @@ function Detail({
     frameObserver.current?.disconnect();
     const document = frame.contentDocument;
     if (!document?.body) return;
-    frame.style.height = "120px";
+    frame.style.height = "1px";
     const resize = () => {
       const style = document.defaultView?.getComputedStyle(document.body);
       const margins =
         (Number.parseFloat(style?.marginTop || "0") || 0) +
         (Number.parseFloat(style?.marginBottom || "0") || 0);
-      const height = Math.max(120, Math.ceil(document.body.scrollHeight + margins));
+      const height = Math.max(1, Math.ceil(document.body.scrollHeight + margins));
       if (frame.style.height !== `${height}px`) {
         frame.style.height = `${height}px`;
       }
@@ -956,7 +956,7 @@ function Detail({
                     title={t("mailDetail")}
                     sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                     onLoad={(event) => fitMessageFrame(event.currentTarget)}
-                    srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>body{display:flow-root;font-family:Arial,sans-serif;margin:0;color:#24272a;overflow-wrap:anywhere}img{max-width:100%;height:auto}pre{white-space:pre-wrap}</style></head><body>${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
+                    srcDoc={`<!doctype html><html><head><meta name="viewport" content="width=device-width"><style>html{overflow-y:hidden}:where(.mail-body){display:flow-root;font-family:Arial,sans-serif;font-size:14px;margin:0;color:#24272a;overflow-wrap:anywhere}:where(.mail-body img){max-width:100%;height:auto}:where(.mail-body pre){white-space:pre-wrap}</style></head><body class="mail-body">${DOMPurify.sanitize(html, { FORBID_TAGS: ["script", "form", "iframe", "object", "embed"] })}</body></html>`}
                   />
                 ) : (
                   <pre>{m.text}</pre>

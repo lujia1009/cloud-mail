@@ -702,20 +702,52 @@ textarea {
   background: var(--hover);
 }
 .detail-view {
+  --message-gutter: 16px;
+  --message-gap: 12px;
   background: var(--surface);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
+.main-area:has(.detail-view) {
+  border-radius: 8px 8px 0 0;
+  box-shadow: none;
+}
+.main-area:has(.detail-view) .mailbox-bar {
+  height: 36px;
+  padding: 0 16px;
+  border-bottom: 0;
+}
+.main-area:has(.detail-view) .mailbox-select {
+  padding: 2px 4px;
+}
+.main-area:has(.detail-view) .mailbox-avatar {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+.main-area:has(.detail-view) .mailbox-text {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 8px;
+}
+.main-area:has(.detail-view) .mailbox-popover {
+  top: 34px;
+}
 .detail-view .detail-toolbar {
   position: relative;
-  flex: 0 0 50px;
+  flex: 0 0 40px;
+  height: 40px;
+  padding: 0 8px;
+  border-bottom: 0;
 }
 .detail-scroll {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }
 .message {
   display: grid;
@@ -723,16 +755,17 @@ textarea {
   column-gap: var(--message-gap);
   width: 100%;
   margin: 0;
-  padding: 28px var(--message-gutter) 32px;
+  padding: 16px var(--message-gutter) 16px;
 }
 .message > :not(.message-meta) {
   grid-column: 2 / -1;
   min-width: 0;
 }
 .message h1 {
-  font-size: 27px;
-  font-weight: 500;
-  margin: 4px 0 24px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.35;
+  margin: 0 0 16px;
   overflow-wrap: anywhere;
 }
 .message-meta {
@@ -771,7 +804,7 @@ textarea {
   align-items: center;
   gap: 4px;
   border: 0;
-  padding: 5px 0;
+  padding: 2px 0;
   background: none;
   color: var(--muted);
   font-size: 12px;
@@ -789,17 +822,17 @@ textarea {
   white-space: nowrap;
 }
 .message-body {
-  padding: 24px 0 18px;
+  padding: 12px 0 8px;
   min-height: 0;
 }
 .message-body iframe {
   display: block;
   border: 0;
   width: 100%;
-  min-height: 120px;
-  height: 120px;
+  min-height: 0;
+  height: 1px;
   background: #fff;
-  border-radius: 4px;
+  border-radius: 0;
 }
 .message-body pre {
   margin: 0;
@@ -807,7 +840,7 @@ textarea {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.5;
 }
 .status-banner {
   background: #fff3df;
@@ -858,15 +891,22 @@ textarea {
 }
 .detail-reply {
   flex: 0 0 auto;
-  border-top: 1px solid var(--line);
+  box-shadow: 0 -1px 0 color-mix(in srgb, var(--line) 45%, transparent);
   background: var(--surface);
-  padding: 12px var(--message-gutter) 12px
+  padding: 8px var(--message-gutter) 8px
     calc(var(--message-gutter) + var(--message-avatar) + var(--message-gap));
 }
 .detail-reply-inner {
   min-width: 0;
   display: flex;
-  gap: 12px;
+  gap: 8px;
+}
+.detail-reply .ui-button {
+  min-height: 34px;
+  padding: 6px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 20px;
 }
 .compose-window {
   position: fixed;
@@ -2295,10 +2335,10 @@ body:has(.login-page) {
     --message-gap: 10px;
   }
   .message {
-    padding-block: 19px;
+    padding-block: 12px;
   }
   .message h1 {
-    font-size: 22px;
+    font-size: 20px;
   }
   .settings-page,
   .admin-page {
@@ -2353,8 +2393,8 @@ body:has(.login-page) {
     height: 48px;
   }
   .detail-reply {
-    padding-top: 10px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding-top: 8px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
   .detail-reply-inner {
     width: 100%;
