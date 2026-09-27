@@ -710,36 +710,11 @@ textarea {
   overflow: hidden;
 }
 .main-area:has(.detail-view) {
-  border-radius: 8px 8px 0 0;
   box-shadow: none;
-}
-.main-area:has(.detail-view) .mailbox-bar {
-  height: 36px;
-  padding: 0 16px;
-  border-bottom: 0;
-}
-.main-area:has(.detail-view) .mailbox-select {
-  padding: 2px 4px;
-}
-.main-area:has(.detail-view) .mailbox-avatar {
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-}
-.main-area:has(.detail-view) .mailbox-text {
-  flex-direction: row;
-  align-items: baseline;
-  gap: 8px;
-}
-.main-area:has(.detail-view) .mailbox-popover {
-  top: 34px;
 }
 .detail-view .detail-toolbar {
   position: relative;
-  flex: 0 0 40px;
-  height: 40px;
-  padding: 0 8px;
-  border-bottom: 0;
+  flex: 0 0 50px;
 }
 .detail-scroll {
   flex: 1 1 auto;
@@ -1823,9 +1798,8 @@ body:has(.login-page) {
   gap: calc(var(--login-layout-width) * 0.07);
   max-width: 1680px;
   margin: auto;
-  padding: clamp(100px, 19.8dvh, 180px)
-    calc(var(--login-layout-width) * 0.107) 8px
-    calc(var(--login-layout-width) * 0.048);
+  padding: clamp(100px, 19.8dvh, 180px) calc(var(--login-layout-width) * 0.107)
+    8px calc(var(--login-layout-width) * 0.048);
 }
 .login-brand {
   position: absolute;
@@ -2451,4 +2425,44 @@ body:has(.login-page) {
   .message-meta time {
     display: none;
   }
+}
+
+/* First-time setup shares the login shell, card and controls. */
+.login-form .setup-heading {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  clip: auto;
+  white-space: normal;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+.setup-status {
+  color: var(--muted);
+  font-size: 13px;
+}
+.setup-description {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.setup-error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 13px;
+}
+.setup-continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.setup-back {
+  text-align: center;
+  font-size: 14px;
+  text-decoration: none;
 }

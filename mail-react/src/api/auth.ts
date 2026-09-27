@@ -18,5 +18,6 @@ export const auth = {
       code,
       redirectUri,
     }),
-  bind: (form: Record<string, unknown>) => put("/oauth/bindUser", form),
+  bind: (form: Record<string, unknown>) =>
+    put<{ token: string }>("/oauth/bindUser", form),
 };

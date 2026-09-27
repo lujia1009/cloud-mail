@@ -1,7 +1,8 @@
+import jwtUtils from "../utils/jwt-utils";
 import BizError from "../error/biz-error";
 import orm from "../entity/orm";
 import {oauth} from "../entity/oauth";
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import userService from "./user-service";
 import loginService from "./login-service";
 import cryptoUtils from "../utils/crypto-utils";
@@ -12,9 +13,18 @@ const oauthService = {
 
 	async bindUser(c, params) {
 
-		const { email, oauthUserId, code } = params;
+		const { email, setupToken, code } = params;
+		const proof = await jwtUtils.verifyToken(c, setupToken || "");
+		if (!proof || proof.purpose !== "oauth-setup" || !proof.exp || proof.exp <= Math.floor(Date.now() / 1000)) {
+			throw new BizError("账号设置会话已失效，请重新登录");
+		}
 
-		const oauthRow = await this.getById(c, oauthUserId);
+		const oauthRow = await orm(c).select().from(oauth).where(eq(oauth.oauthId, proof.oauthId)).get();
+		if (!oauthRow || oauthRow.platform !== proof.platform || oauthRow.oauthUserId !== proof.subject) {
+			throw new BizError("账号设置会话无效，请重新登录");
+		}
+		const setting = await settingService.query(c);
+		this.assertEnabled(setting, oauthRow.platform + "Switch");
 
 		let userRow = await userService.selectByIdIncludeDel(c, oauthRow.userId);
 
@@ -26,7 +36,7 @@ const oauthService = {
 
 		userRow = await userService.selectByEmail(c, email);
 
-		orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthUserId, oauthUserId)).run();
+		await orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthId, oauthRow.oauthId)).run();
 		const jwtToken = await loginService.login(c, { email, password: null }, true);
 
 		return { userInfo: oauthRow, token: jwtToken}
@@ -170,6 +180,7 @@ const oauthService = {
 
 		const userInfo = await userRes.json();
 
+		if (!userInfo.sub) throw new BizError("Google 身份验证失败");
 		userInfo.oauthUserId = String(userInfo.sub);
 		userInfo.username = userInfo.email;
 		userInfo.name = userInfo.name;
@@ -185,7 +196,8 @@ const oauthService = {
 		const userRow = await userService.selectByIdIncludeDel(c, oauthRow.userId);
 
 		if (!userRow) {
-			return { userInfo: oauthRow, token: null };
+			const setupToken = await jwtUtils.generateToken(c, { purpose: "oauth-setup", oauthId: oauthRow.oauthId, platform: oauthRow.platform, subject: oauthRow.oauthUserId }, 900);
+			return { userInfo: oauthRow, token: null, setupToken, expiresAt: Date.now() + 900000 };
 		}
 
 		const JwtToken = await loginService.login(c, { email: userRow.email, password: null }, true);
@@ -194,12 +206,12 @@ const oauthService = {
 
 	async saveUser(c, userInfo) {
 
-		const userInfoRow = await this.getById(c, userInfo.oauthUserId);
+		const userInfoRow = await this.getById(c, userInfo.oauthUserId, userInfo.platform);
 
 		if (!userInfoRow) {
 			return await orm(c).insert(oauth).values(userInfo).returning().get();
 		} else {
-			return await orm(c).update(oauth).set(userInfo).where(eq(oauth.oauthUserId, userInfo.oauthUserId)).returning().get();
+			return await orm(c).update(oauth).set(userInfo).where(eq(oauth.oauthId, userInfoRow.oauthId)).returning().get();
 		}
 
 	},
@@ -210,8 +222,8 @@ const oauthService = {
 		}
 	},
 
-	async getById(c, oauthUserId) {
-		return await orm(c).select().from(oauth).where(eq(oauth.oauthUserId, oauthUserId)).get();
+	async getById(c, oauthUserId, platform) {
+		return await orm(c).select().from(oauth).where(and(eq(oauth.oauthUserId, oauthUserId), eq(oauth.platform, platform))).get();
 	},
 
 	async deleteByUserId(c, userId) {
