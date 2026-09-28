@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { auth } from "../api/auth";
-import { AuthLayout } from "../components/AuthLayout";
+import { Mail, LoaderCircle, CircleAlert } from "lucide-react";
 import { useFinishLogin } from "../hooks/useFinishLogin";
 
 export function OAuthCallbackPage() {
@@ -12,6 +12,9 @@ export function OAuthCallbackPage() {
   const started = useRef(false);
   const [error, setError] = useState("");
   const config = useQuery({ queryKey: ["config"], queryFn: auth.config });
+  useEffect(() => {
+    document.title = `正在完成登录 · ${config.data?.title || "VirMail"}`;
+  }, [config.data?.title]);
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -62,20 +65,29 @@ export function OAuthCallbackPage() {
     );
   }, []);
   return (
-    <AuthLayout settings={config.data || {}} subtitle="正在完成身份验证">
-      <section className="login-form setup-form" aria-live="polite">
-        <h2 className="setup-heading">
-          {error ? "暂时无法完成登录" : "正在验证登录信息"}
-        </h2>
-        <p className="setup-description">
-          {error || "验证完成后，将自动进入邮箱或首次账号设置。"}
-        </p>
+    <main className="oauth-transition">
+      <div className="oauth-brand">
+        <Mail size={26} aria-hidden="true" />
+        <span>{config.data?.title || "VirMail"}</span>
+      </div>
+      <section className="oauth-status" aria-live="polite" aria-busy={!error}>
+        {error ? (
+          <CircleAlert size={28} aria-hidden="true" />
+        ) : (
+          <LoaderCircle
+            className="oauth-spinner"
+            size={28}
+            aria-hidden="true"
+          />
+        )}
+        <h1>{error ? "暂时无法完成登录" : "正在完成登录"}</h1>
+        <p>{error || "正在确认你的身份，即将为你准备好邮箱。"}</p>
         {error && (
-          <Link className="primary-button setup-continue" to="/login">
+          <Link className="onboarding-primary" to="/login">
             返回登录
           </Link>
         )}
       </section>
-    </AuthLayout>
+    </main>
   );
 }
