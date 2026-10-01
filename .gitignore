@@ -23,6 +23,9 @@ dist
 
 mail-vue/node_modules
 mail-vue/dist
+mail-react/tinymce-source.tar
+*.tsbuildinfo
 .wrangler
+mail-worker/wrangler-bindings.generated.json
 .venv
 git-tools.js

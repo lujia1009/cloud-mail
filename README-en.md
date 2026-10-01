@@ -1,23 +1,23 @@
 <p align="center">
     <img src="doc/demo/logo.png" width="80px" />
     <h1 align="center">Cloud Mail</h1>
-    <p align="center">A simple, responsive email service designed to run on Cloudflare Workers 🎉</p> 
+    <p align="center">A simple, responsive email service designed to run on Cloudflare Workers 🎉</p>
     <p align="center">
-       <a href="/README.md" style="margin-left: 5px">简体中文</a> | English 
+       <a href="/README.md" style="margin-left: 5px">简体中文</a> | English
     </p>
     <p align="center">
         <a href="https://github.com/maillab/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
             <img src="https://img.shields.io/badge/license-MIT-green" />
-        </a>    
+        </a>
         <a href="https://github.com/maillab/cloud-mail/releases" target="_blank" >
             <img src="https://img.shields.io/github/v/release/maillab/cloud-mail" alt="releases" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/issues" >
             <img src="https://img.shields.io/github/issues/maillab/cloud-mail" alt="issues" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/stargazers" target="_blank">
             <img src="https://img.shields.io/github/stars/maillab/cloud-mail" alt="stargazers" />
-        </a>  
+        </a>
         <a href="https://github.com/maillab/cloud-mail/forks" target="_blank" >
             <img src="https://img.shields.io/github/forks/maillab/cloud-mail" alt="forks" />
         </a>
@@ -75,9 +75,9 @@ With only one domain, you can create multiple different email addresses, similar
 
 - **ORM**: [Drizzle](https://orm.drizzle.team/)
 
-- **Frontend Framework**: [Vue3](https://vuejs.org/)
+- **Frontend Framework**: [React](https://react.dev/)
 
-- **UI Framework**: [Element Plus](https://element-plus.org/)
+- **UI Framework**: React + TypeScript
 
 - **Email Service**: [Resend](https://resend.com/)
 
@@ -92,7 +92,7 @@ With only one domain, you can create multiple different email addresses, similar
 ```
 cloud-mail
 ├── mail-worker				    # Backend worker project
-│   ├── src                  
+│   ├── src
 │   │   ├── api	 			    # API layer
 │   │   ├── const  			    # Project constants
 │   │   ├── dao                 # Data access layer
@@ -111,7 +111,7 @@ cloud-mail
 │   ├── package.json			# Project dependencies
 │   └── wrangler.toml			# Project configuration
 │
-├─ mail-vue				        # Frontend Vue project
+├─ mail-react				        # Frontend React project
 │   ├── src
 │   │   ├── axios 			    # Axios configuration
 │   │   ├── components			# Custom components
