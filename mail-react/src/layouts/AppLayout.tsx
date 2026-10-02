@@ -44,6 +44,7 @@ import { useApp, hasPerm } from "../stores/app";
 import { IconButton } from "../components/Feedback";
 import { Button } from "../components/Controls";
 import { Compose } from "../features/compose/Compose";
+import { TurnstileWidget } from "../components/TurnstileWidget";
 const links = [
   ["/inbox", "inbox", Inbox],
   ["/starred", "starred", Star],
@@ -133,29 +134,6 @@ export function AppLayout() {
     );
     return () => window.clearTimeout(timer);
   }, [noticeOpen, config.noticeDuration]);
-  useEffect(() => {
-    if (!addMailbox || !verifyRequired || !config.siteKey) return;
-    let id: string | undefined;
-    const render = () => {
-      if (window.turnstile)
-        id = window.turnstile.render("#mailbox-turnstile", {
-          sitekey: config.siteKey,
-          callback: (value: string) => setVerifyToken(value),
-        });
-    };
-    if (window.turnstile) render();
-    else {
-      const script = document.createElement("script");
-      script.src =
-        "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true;
-      script.onload = render;
-      document.head.appendChild(script);
-    }
-    return () => {
-      if (id) window.turnstile?.reset(id);
-    };
-  }, [addMailbox, verifyRequired, config.siteKey]);
   const accountsQuery = useQuery({
     queryKey: ["accounts"],
     queryFn: accounts.all,
@@ -652,7 +630,9 @@ export function AppLayout() {
                 </select>
               )}
             </span>
-            {verifyRequired && <div id="mailbox-turnstile" />}
+            {verifyRequired && config.siteKey && (
+              <TurnstileWidget siteKey={config.siteKey} onToken={setVerifyToken} />
+            )}
             <div className="modal-actions">
               <button type="button" onClick={() => setAddMailbox(false)}>
                 {t("cancel")}

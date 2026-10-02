@@ -8,15 +8,6 @@ import { AppLayout } from "../layouts/AppLayout";
 import { LoginPage } from "../pages/LoginPage";
 import { OAuthCallbackPage } from "../pages/OAuthCallbackPage";
 import { SetupAccountPage } from "../pages/SetupAccountPage";
-function LoginEntry() {
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
-  return params.has("code") || params.has("error") ? (
-    <OAuthCallbackPage />
-  ) : (
-    <LoginPage />
-  );
-}
 const MailPage = lazy(() =>
   import("../features/mail/MailPage").then((m) => ({ default: m.MailPage })),
 );
@@ -115,7 +106,7 @@ export default function App() {
       <Toast />
       <Suspense fallback={<Skeleton />}>
         <Routes>
-          <Route path="/login" element={<LoginEntry />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route
             path="/auth/:provider/callback"
             element={<OAuthCallbackPage />}

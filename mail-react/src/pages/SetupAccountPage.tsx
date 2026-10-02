@@ -6,6 +6,7 @@ import { auth } from "../api/auth";
 import { Mail, Check } from "lucide-react";
 import { ErrorState, Skeleton } from "../components/Feedback";
 import { useFinishLogin } from "../hooks/useFinishLogin";
+import { startOAuth } from "../utils/oauth";
 
 export function SetupAccountPage() {
   const { t } = useTranslation();
@@ -40,22 +41,9 @@ export function SetupAccountPage() {
     !session.expiresAt ||
     session.expiresAt <= Date.now();
   const switchGoogleAccount = () => {
-    const state = crypto.randomUUID();
-    const redirectUri = `${location.origin}/auth/google/callback`;
-    sessionStorage.removeItem("oauthSetup");
-    sessionStorage.setItem(
-      "oauthRequest",
-      JSON.stringify({ provider: "google", state, redirectUri }),
-    );
-    const params = new URLSearchParams({
-      client_id: settings.googleClientId || "",
-      redirect_uri: redirectUri,
-      response_type: "code",
-      scope: "openid profile email",
-      state,
-      prompt: "select_account",
+    startOAuth("google", settings.googleClientId || "", {
+      selectAccount: true,
     });
-    location.assign(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
   };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();

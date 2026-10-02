@@ -8,14 +8,8 @@ import { useApp } from "../stores/app";
 import { AuthLayout } from "../components/AuthLayout";
 import { useFinishLogin } from "../hooks/useFinishLogin";
 import { ErrorState, Skeleton } from "../components/Feedback";
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (selector: string, options?: Record<string, unknown>) => string;
-      reset: (id: string) => void;
-    };
-  }
-}
+import { TurnstileWidget } from "../components/TurnstileWidget";
+import { startOAuth, type OAuthProvider } from "../utils/oauth";
 export function LoginPage() {
   const { t } = useTranslation();
 
@@ -45,58 +39,8 @@ export function LoginPage() {
     if (domains.length && !domains.includes(suffix)) setSuffix(domains[0]);
     document.title = settings.title ?? "Virevan Mail";
   }, [settings.title, domains.join(",")]);
-  useEffect(() => {
-    if (!settings.siteKey || !verifyRequired) return;
-    let id: string | undefined;
-    let active = true;
-    const render = () => {
-      if (!active || !window.turnstile || !document.querySelector("#turnstile"))
-        return;
-      id = window.turnstile.render("#turnstile", {
-        sitekey: settings.siteKey,
-        callback: (value: string) => setToken(value),
-      });
-    };
-    if (window.turnstile) render();
-    else {
-      let script = document.querySelector<HTMLScriptElement>(
-        'script[data-turnstile="true"]',
-      );
-      if (!script) {
-        script = document.createElement("script");
-        script.dataset.turnstile = "true";
-        script.src =
-          "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-        script.async = true;
-        document.head.appendChild(script);
-      }
-      script.addEventListener("load", render, { once: true });
-    }
-    return () => {
-      active = false;
-      if (id) window.turnstile?.reset(id);
-    };
-  }, [verifyRequired, settings.siteKey]);
-  const oauth = (provider: "linuxdo" | "github" | "google") => {
-    const clientId = settings[provider + "ClientId"];
-    const callback =
-      location.origin +
-      (provider === "google" ? "/auth/google/callback" : "/login");
-    const redirectUri = encodeURIComponent(callback);
-    const state = crypto.randomUUID();
-    sessionStorage.setItem(
-      "oauthRequest",
-      JSON.stringify({ provider, state, redirectUri: callback }),
-    );
-    sessionStorage.removeItem("oauthSetup");
-    sessionStorage.setItem("oauthProvider", provider);
-    const urls = {
-      linuxdo: `https://connect.linux.do/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+profile+email&state=${state}`,
-      github: `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email&state=${state}`,
-      google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+profile+email&state=${state}`,
-    };
-    location.assign(urls[provider]);
-  };
+  const oauth = (provider: OAuthProvider) =>
+    startOAuth(provider, String(settings[provider + "ClientId"] || ""));
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const prefix = fullEmail.split("@")[0];
@@ -292,7 +236,9 @@ export function LoginPage() {
             />
           </label>
         )}
-        {verifyRequired && settings.siteKey && <div id="turnstile" />}
+        {verifyRequired && settings.siteKey && (
+          <TurnstileWidget siteKey={settings.siteKey} onToken={setToken} />
+        )}
         <button className="primary-button" disabled={busy}>
           {busy ? t("loading") : mode === "login" ? t("loginBtn") : t("regBtn")}
         </button>

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { auth } from "../api/auth";
 import { Mail, LoaderCircle, CircleAlert } from "lucide-react";
 import { useFinishLogin } from "../hooks/useFinishLogin";
+import { validateOAuthCallback } from "../utils/oauth";
 
 export function OAuthCallbackPage() {
   const { provider } = useParams();
@@ -19,29 +20,21 @@ export function OAuthCallbackPage() {
     if (started.current) return;
     started.current = true;
     const run = async () => {
-      const params = new URLSearchParams(location.search);
+      const search = location.search;
       // Authorization codes must not remain in browser history, including failures.
       history.replaceState({}, "", location.pathname);
-      const request = JSON.parse(
-        sessionStorage.getItem("oauthRequest") || "null",
+      const callback = validateOAuthCallback(
+        provider,
+        search,
+        sessionStorage.getItem("oauthRequest"),
+        location.origin,
       );
-      if (
-        !request ||
-        request.state !== params.get("state") ||
-        (provider && provider !== request.provider)
-      )
-        throw new Error("登录请求已失效，请重新发起第三方登录。");
-      if (params.has("error"))
-        throw new Error("第三方授权未完成，请重新登录。");
-      const code = params.get("code");
-      if (!code || !["google", "github", "linuxdo"].includes(request.provider))
-        throw new Error("登录回调缺少有效授权信息。");
       sessionStorage.removeItem("oauthRequest");
       sessionStorage.removeItem("oauthProvider");
       const data = await auth.oauth(
-        request.provider === "linuxdo" ? "linuxDo" : request.provider,
-        code,
-        request.redirectUri,
+        callback.provider === "linuxdo" ? "linuxDo" : callback.provider,
+        callback.code,
+        callback.redirectUri,
       );
       if (data.token) {
         await finish(data.token);
@@ -54,7 +47,7 @@ export function OAuthCallbackPage() {
         "oauthSetup",
         JSON.stringify({
           setupToken: data.setupToken,
-          provider: request.provider,
+          provider: callback.provider,
           expiresAt: data.expiresAt,
         }),
       );
